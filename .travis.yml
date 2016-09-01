@@ -1,0 +1,15 @@
+language: python
+python:
+  - "3.5"
+
+# Cache dependencies for faster build
+cache: pip
+
+# command to install dependencies
+install:
+  - pip install numpy
+  - pip install scipy
+
+# command to run tests
+script:
+  - nosetests tests/
