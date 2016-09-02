@@ -6,49 +6,11 @@ We implement only the rate-coded version. The code is intended to be
 as simple as possible to understand. It is not in any way optimized
 for performance.
 """
+import copy
+
 import numpy as np
 import scipy.interpolate
 
-
-
-class UnitSpec:
-    """Units parameters.
-
-    Each unit can have different parameters values. They don't change during
-    cycles, and unless you know what you're doing, you should not change them
-    after the Unit creation. The best way to proceed is to create the UnitSpec,
-    modify it, and pass it to the Unit.__init__ method:
-
-    >>> spec = UnitSpec(act_thr=0.35) # specifying parameters at instanciation
-    >>> spec.bias = 0.5               # you can also do it like that
-    >>> u = Unit(spec)
-
-    """
-
-    def __init__(self, **kwargs):
-        # time step constants
-        self.dt_net    = 0.7   # for net update (net = g_e * g_bar_e) (eq. 2.8)
-        self.dt_vm     = 0.1   # for vm update (eq. 2.16)
-        # input channels parameters (eq. 2.8)
-        self.g_l       = 1.0   # leak current (constant)
-        self.g_bar_e   = 0.4   # excitatory maximum conductance
-        self.g_bar_i   = 1.0   # inhibitory maximum conductance
-        self.g_bar_l   = 2.8   # leak maximum conductance
-        # reversal potential (eq. 2.8)
-        self.e_rev_e   = 1.0   # excitatory
-        self.e_rev_i   = 0.15  # inhibitory
-        self.e_rev_l   = 0.15  # leak
-        # activation function parameters (eq. 2.19)
-        self.act_thr   = 0.25  # threshold
-        self.act_gain  = 600   # gain
-
-        self.bias      = 0.0
-
-        self.noisy_act = False # If True, uses the noisy activation function (eq A5)
-        self.act_sd    = 0.005 # standard deviation of the noisy gaussian (eq A5)
-
-        for key, value in kwargs.items():
-            setattr(self, key, value)
 
 
 class Unit:
@@ -182,3 +144,49 @@ class Unit:
         print('State:')
         for name in ['g_e', 'I_net', 'v_m', 'act']:
             print('   {}: {:.2f}'.format(name, getattr(self, name)))
+
+
+class UnitSpec:
+    """Units parameters.
+
+    Each unit can have different parameters values. They don't change during
+    cycles, and unless you know what you're doing, you should not change them
+    after the Unit creation. The best way to proceed is to create the UnitSpec,
+    modify it, and pass it to the Unit.__init__ method:
+
+    >>> spec = UnitSpec(act_thr=0.35) # specifying parameters at instanciation
+    >>> spec.bias = 0.5               # you can also do it like that
+    >>> u = Unit(spec)
+
+    """
+
+    Concrete = Unit # the concrete class that gets created from the spec.
+
+    def instanciate(self, copyspec=False):
+        spec = copy.copy(self) if copyspec else self
+        return self.Concrete(spec=spec)
+
+    def __init__(self, **kwargs):
+        # time step constants
+        self.dt_net    = 0.7   # for net update (net = g_e * g_bar_e) (eq. 2.8)
+        self.dt_vm     = 0.1   # for vm update (eq. 2.16)
+        # input channels parameters (eq. 2.8)
+        self.g_l       = 1.0   # leak current (constant)
+        self.g_bar_e   = 0.4   # excitatory maximum conductance
+        self.g_bar_i   = 1.0   # inhibitory maximum conductance
+        self.g_bar_l   = 2.8   # leak maximum conductance
+        # reversal potential (eq. 2.8)
+        self.e_rev_e   = 1.0   # excitatory
+        self.e_rev_i   = 0.15  # inhibitory
+        self.e_rev_l   = 0.15  # leak
+        # activation function parameters (eq. 2.19)
+        self.act_thr   = 0.25  # threshold
+        self.act_gain  = 600   # gain
+
+        self.bias      = 0.0
+
+        self.noisy_act = False # If True, uses the noisy activation function (eq A5)
+        self.act_sd    = 0.005 # standard deviation of the noisy gaussian (eq A5)
+
+        for key, value in kwargs.items():
+            setattr(self, key, value)
