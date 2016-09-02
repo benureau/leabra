@@ -162,7 +162,7 @@ class UnitSpec:
 
     Concrete = Unit # the concrete class that gets created from the spec.
 
-    def instanciate(self, copyspec=False):
+    def instantiate(self, copyspec=False):
         spec = copy.copy(self) if copyspec else self
         return self.Concrete(spec=spec)
 

@@ -16,11 +16,11 @@ class UnitTests(unittest.TestCase):
         self.assertTrue(u.noisy_xx1(0.20) > 0.0)
         self.assertTrue(u.noisy_xx1(0.30) > 0.0)
 
-    def test_instanciate(self):
+    def test_instantiate(self):
         u_spec = leabra.UnitSpec()
         u_spec.act_thr = 0.25
-        u = u_spec.instanciate()
-        u2 = u_spec.instanciate()
+        u = u_spec.instantiate()
+        u2 = u_spec.instantiate()
         self.assertEqual(u.spec.act_thr, 0.25)
         self.assertEqual(u2.spec.act_thr, 0.25)
         u.spec.act_thr = 0.30
