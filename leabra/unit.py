@@ -34,8 +34,12 @@ class Unit:
         self.act   = 0     # current activity
         self.act_m = 0     # activity at the end of the minus phase
 
-        self._nxx1_conv = None # precomputed convolution for the noisy xx1 function
         self.logs  = {'net': [], 'act': [], 'I_net': [], 'v_m': []}
+
+
+    def cycle(self, g_i=0.0, dt_integ=1):
+        """Cycle the unit"""
+        return self.spec.cycle(self, g_i=g_i, dt_integ=dt_integ)
 
 
     @property
@@ -58,75 +62,6 @@ class Unit:
         self.forced_act = forced_act
 
 
-    def cycle(self, g_i=0.0, dt_integ=1):
-        """Update activity
-
-        g_i     :  inhibitory input
-        dt_integ:  integration time step, in ms.
-        """
-        # computing net_raw, the total, instantaneous, excitatory input for the neuron
-        net_raw = sum(self.ex_inputs) # / max(1, len(self.ex_inputs))
-        self.ex_inputs = []
-
-        if self.forced_act:
-            self.act = net_raw
-            self.forced_act = False
-            return # done!
-
-        # updating net
-        self.g_e += dt_integ * self.spec.dt_net * (net_raw - self.g_e)  # eq 2.16
-
-        # computing I_net
-        gc_e = self.spec.g_bar_e * self.g_e
-        gc_i = self.spec.g_bar_i * g_i
-        gc_l = self.spec.g_bar_l * self.spec.g_l
-        self.I_net = (  gc_e * (self.spec.e_rev_e - self.v_m)  # eq 2.8
-                      + gc_i * (self.spec.e_rev_i - self.v_m)
-                      + gc_l * (self.spec.e_rev_l - self.v_m))
-
-        # updating v_m
-        self.v_m += dt_integ * self.spec.dt_vm * self.I_net  # eq 2.8
-
-        # updating activity
-        if self.spec.noisy_act:
-            self.act = self.noisy_xx1(self.v_m)
-        else:
-            self.act = self.xx1(self.v_m)
-
-        self.update_logs()
-
-
-    def xx1(self, v_m):
-        """Compute the x/(x+1) function."""
-        X = self.spec.act_gain * max((v_m - self.spec.act_thr), 0.0)
-        return X / (X + 1) # eq 2.19
-
-
-    def noisy_xx1(self, v_m):
-        """Compute the noisy x/(x+1) function.
-
-        The noisy x/(x+1) function is the convolution of the x/(x+1) function
-        with a Gaussian with a `self.spec.act_sd` standard deviation. Here, we
-        precompute the convolution as a look-up table, and interpolate it with
-        the desired point every time the function is called.
-        """
-        if self._nxx1_conv is None:  # convolution not precomputed yet
-            xs = np.linspace(-2.0, 2.0, 2000)  # x represents (self.v_m - self.spec.act_thr)
-            X  = self.spec.act_gain * np.maximum(xs, 0)
-            xx1 = X / (X + 1)  # regular x/(x+1) function over xs
-
-            gaussian = (np.exp(-xs**2 / (2 * self.spec.act_sd**2)) /
-                        (self.spec.act_sd * np.sqrt(2 * np.pi)))
-
-            conv = np.convolve(xx1, gaussian, mode='same') / np.sum(gaussian)
-            self._nxx1_conv = xs, conv
-
-        x = v_m - self.spec.act_thr
-        xs, conv = self._nxx1_conv
-        return float(scipy.interpolate.interp1d(xs, conv, kind='linear',
-                                                fill_value='extrapolate')(x))
-
-
     def update_logs(self):
         """Record current state. Called after each cycle."""
         self.logs['net'].append(self.net)
@@ -137,7 +72,7 @@ class Unit:
 
     def show_config(self):
         """Display the value of constants and state variables."""
-        print('Constants:')
+        print('Parameters:')
         for name in ['dt_vm', 'dt_net', 'g_l', 'g_bar_e', 'g_bar_l', 'g_bar_i',
                      'e_rev_e', 'e_rev_l', 'e_rev_i', 'act_thr', 'act_gain']:
             print('   {}: {:.2f}'.format(name, getattr(self.spec, name)))
@@ -146,25 +81,27 @@ class Unit:
             print('   {}: {:.2f}'.format(name, getattr(self, name)))
 
 
+
 class UnitSpec:
-    """Units parameters.
+    """Units specification.
 
     Each unit can have different parameters values. They don't change during
     cycles, and unless you know what you're doing, you should not change them
     after the Unit creation. The best way to proceed is to create the UnitSpec,
-    modify it, and pass it to the Unit.__init__ method:
+    modify it, and then instantiate Unit from it:
 
-    >>> spec = UnitSpec(act_thr=0.35) # specifying parameters at instanciation
-    >>> spec.bias = 0.5               # you can also do it like that
-    >>> u = Unit(spec)
+    >>> spec = UnitSpec(act_thr=0.35) # specifying parameters at instantiation
+    >>> spec.bias = 0.5               # you can also do it afterward
+    >>> u = spec.instantiate()        # creating a Unit instance
 
     """
 
-    Concrete = Unit # the concrete class that gets created from the spec.
+    concrete = Unit # the concrete class that gets created from the spec.
 
     def instantiate(self, copyspec=False):
         spec = copy.copy(self) if copyspec else self
-        return self.Concrete(spec=spec)
+        return self.concrete(spec=spec)
+
 
     def __init__(self, **kwargs):
         # time step constants
@@ -190,3 +127,75 @@ class UnitSpec:
 
         for key, value in kwargs.items():
             setattr(self, key, value)
+
+        self._nxx1_conv = None # precomputed convolution for the noisy xx1 function
+
+
+    def xx1(self, v_m):
+        """Compute the x/(x+1) function."""
+        X = self.act_gain * max((v_m - self.act_thr), 0.0)
+        return X / (X + 1) # eq 2.19
+
+
+    def noisy_xx1(self, v_m):
+        """Compute the noisy x/(x+1) function.
+
+        The noisy x/(x+1) function is the convolution of the x/(x+1) function
+        with a Gaussian with a `self.spec.act_sd` standard deviation. Here, we
+        precompute the convolution as a look-up table, and interpolate it with
+        the desired point every time the function is called.
+        """
+        if self._nxx1_conv is None:  # convolution not precomputed yet
+            xs = np.linspace(-2.0, 2.0, 2000)  # x represents (self.v_m - self.spec.act_thr)
+            X  = self.act_gain * np.maximum(xs, 0)
+            xx1 = X / (X + 1)  # regular x/(x+1) function over xs
+
+            gaussian = (np.exp(-xs**2 / (2 * self.act_sd**2)) /
+                        (self.act_sd * np.sqrt(2 * np.pi)))
+
+            conv = np.convolve(xx1, gaussian, mode='same') / np.sum(gaussian)
+            self._nxx1_conv = xs, conv
+
+        x = v_m - self.act_thr
+        xs, conv = self._nxx1_conv
+        return float(scipy.interpolate.interp1d(xs, conv, kind='linear',
+                                                fill_value='extrapolate')(x))
+
+
+    def cycle(self, unit, g_i=0.0, dt_integ=1):
+        """Update activity
+
+        unit    :  the unit to cycle
+        g_i     :  inhibitory input
+        dt_integ:  integration time step, in ms.
+        """
+        # computing net_raw, the total, instantaneous, excitatory input for the neuron
+        net_raw = sum(unit.ex_inputs) # / max(1, len(self.ex_inputs))
+        unit.ex_inputs = []
+
+        if unit.forced_act:
+            unit.act = net_raw
+            unit.forced_act = False
+            return # done!
+
+        # updating net
+        unit.g_e += dt_integ * self.dt_net * (net_raw - unit.g_e)  # eq 2.16
+
+        # computing I_net
+        gc_e = self.g_bar_e * unit.g_e
+        gc_i = self.g_bar_i * g_i
+        gc_l = self.g_bar_l * self.g_l
+        unit.I_net = (  gc_e * (self.e_rev_e - unit.v_m)  # eq 2.8
+                      + gc_i * (self.e_rev_i - unit.v_m)
+                      + gc_l * (self.e_rev_l - unit.v_m))
+
+        # updating v_m
+        unit.v_m += dt_integ * self.dt_vm * unit.I_net  # eq 2.8
+
+        # updating activity
+        if self.noisy_act:
+            unit.act = self.noisy_xx1(unit.v_m)
+        else:
+            unit.act = self.xx1(unit.v_m)
+
+        unit.update_logs()
