@@ -41,6 +41,9 @@ class Unit:
         """Cycle the unit"""
         return self.spec.cycle(self, g_i=g_i, dt_integ=dt_integ)
 
+    def calculate_net_in(self):
+        return self.spec.cycle(self)
+
 
     @property
     def net(self):
@@ -162,13 +165,7 @@ class UnitSpec:
                                                 fill_value='extrapolate')(x))
 
 
-    def cycle(self, unit, g_i=0.0, dt_integ=1):
-        """Update activity
-
-        unit    :  the unit to cycle
-        g_i     :  inhibitory input
-        dt_integ:  integration time step, in ms.
-        """
+    def integrate_net_in(self, unit):
         # computing net_raw, the total, instantaneous, excitatory input for the neuron
         net_raw = sum(unit.ex_inputs) # / max(1, len(self.ex_inputs))
         unit.ex_inputs = []
@@ -180,6 +177,17 @@ class UnitSpec:
 
         # updating net
         unit.g_e += dt_integ * self.dt_net * (net_raw - unit.g_e)  # eq 2.16
+
+        
+
+    def cycle(self, unit, g_i=0.0, dt_integ=1):
+        """Update activity
+
+        unit    :  the unit to cycle
+        g_i     :  inhibitory input
+        dt_integ:  integration time step, in ms.
+        """
+        
 
         # computing I_net
         gc_e = self.g_bar_e * unit.g_e
