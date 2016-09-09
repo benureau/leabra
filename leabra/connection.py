@@ -105,7 +105,7 @@ class ConnectionSpec:
         """Transmit activity."""
         for link in connection.links:
             scaled_act = self.st * link.wt * link.pre.act
-            link.post.add_excitatory(scaled_act, forced_act=self.force)
+            link.post.add_excitatory(scaled_act, forced=self.force)
         
 
     def _full_projection(self, connection):

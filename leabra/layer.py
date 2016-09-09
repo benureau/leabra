@@ -37,10 +37,10 @@ class Layer:
             u.act = inp
 
     
-    def add_excitatory(self, inputs, forced_act=False):
+    def add_excitatory(self, inputs, forced=False):
         assert len(inputs) == self.size
         for u, net_raw in zip(self.units, inputs):
-            u.add_excitatory(net_raw, forced_act=forced_act)
+            u.add_excitatory(net_raw, forced=forced)
 
     def cycle(self):
         self.spec.cycle(self)
@@ -68,7 +68,7 @@ class LayerSpec:
         self.fb = 1                 # feedback scaling of inhibition
 
         # thresholds:
-        slef.ff0 = 0
+        self.ff0 = 0
 
         for key, value in kwargs.items():
             setattr(self, key, value)
@@ -90,5 +90,7 @@ class LayerSpec:
 
         """Update the state of the layer"""
         self.g_i = self._inhibition(layer)
+        
         for u in layer.units:
             u.cycle(g_i=self.g_i)
+        
