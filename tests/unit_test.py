@@ -33,6 +33,16 @@ class UnitTests(unittest.TestCase):
         u.calculate_net_in()
         u.cycle()
         self.assertEqual(u.act, 0.5)
+        for _ in range(10):
+            u.calculate_net_in()
+            u.cycle()
+            self.assertEqual(u.act, 0.5)
+
+        u.add_excitatory(0.5, forced=False)
+        u.calculate_net_in()
+        u.cycle()
+        self.assertFalse(u.act == 0.5)
+
 
 
 if __name__ == '__main__':
