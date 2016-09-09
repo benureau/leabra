@@ -1,4 +1,5 @@
 from .unit import Unit
+import statistics
 
 
 class Layer:
@@ -65,10 +66,12 @@ class LayerSpec:
         self.fb_dt = 1/1.4          # Integration constant for feed back inhibition
         
         # weighting constants
-        self.fb = 1                 # feedback scaling of inhibition
+        self.fb = 1.0                 # feedback scaling of inhibition
+        self.ff = 1.0                 # feedforward scaling of inhibition
+        self.gi = 1.8
 
         # thresholds:
-        self.ff0 = 0
+        self.ff0 = 0.1
 
         for key, value in kwargs.items():
             setattr(self, key, value)
@@ -76,8 +79,15 @@ class LayerSpec:
     def _inhibition(self, layer):
         """Compute inhibition"""
 
+
+        # Calculate feed forward inhibition
+        netin = [u.g_e for u in layer.units]
+        layer.ffi = self.ff * max(0, statistics.mean(netin) - self.ff0) 
         
-        return 0.0
+        # Calculate feed back inhibition
+        layer.fbi += self.fb_dt * (self.fb * statistics.mean(layer.activities) - layer.fbi) 
+        
+        return self.gi * (layer.ffi + layer.fbi)
 
     
     def cycle(self, layer):
