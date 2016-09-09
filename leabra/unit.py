@@ -51,18 +51,20 @@ class Unit:
         return self.spec.g_bar_e * self.g_e
 
 
-    def add_excitatory(self, inp_act, forced_act=False):
+    def add_excitatory(self, inp_act, forced=False):
         """Add an input for the next cycle.
 
-        If the activity is directly set (`forced_act==True`), then there should
-        be only one element in `self.ex_inputs` when calling `cycle()`: the
-        desired activity.
+        If the activity is directly set (`forced==True`), then at most one call
+        to add_excitatory should be done per cycle. If no call is made and the
+        last call was forced, then the subsequent cycles continue to force this
+        value on the unit activity.
         """
-        assert not self.forced_act
-        if forced_act:
+        self.forced = forced
+        if self.forced: # the activity is set directly
             assert len(self.ex_inputs) == 0
-        self.ex_inputs.append(inp_act)
-        self.forced_act = forced_act
+            self.forced_act = inp_act
+        else:
+            self.ex_inputs.append(inp_act)
 
 
     def update_logs(self):
@@ -91,20 +93,13 @@ class UnitSpec:
     Each unit can have different parameters values. They don't change during
     cycles, and unless you know what you're doing, you should not change them
     after the Unit creation. The best way to proceed is to create the UnitSpec,
-    modify it, and then instantiate Unit from it:
+    modify it, and provide the spec when instantiating a Unit:
 
     >>> spec = UnitSpec(act_thr=0.35) # specifying parameters at instantiation
     >>> spec.bias = 0.5               # you can also do it afterward
-    >>> u = spec.instantiate()        # creating a Unit instance
+    >>> u = Unit(spec=spec)           # creating a Unit instance
 
     """
-
-    concrete = Unit # the concrete class that gets created from the spec.
-
-    def instantiate(self, copyspec=False):
-        spec = copy.copy(self) if copyspec else self
-        return self.concrete(spec=spec)
-
 
     def __init__(self, **kwargs):
         # time step constants
@@ -166,18 +161,18 @@ class UnitSpec:
 
 
     def calculate_net_in(self, unit, dt_integ=1):
+        """Calculate the net input for the unit. To execute before cycle()"""
+        if unit.forced:
+            unit.act = unit.forced_act
+            return # done!
+
         # computing net_raw, the total, instantaneous, excitatory input for the neuron
         net_raw = sum(unit.ex_inputs) # / max(1, len(self.ex_inputs))
         unit.ex_inputs = []
 
-        if unit.forced_act:
-            unit.act = net_raw
-            unit.forced_act = False
-            return # done!
-        
         # updating net
         unit.g_e += dt_integ * self.dt_net * (net_raw - unit.g_e)  # eq 2.16
-        
+
 
     def cycle(self, unit, g_i=0.0, dt_integ=1):
         """Update activity
@@ -186,8 +181,8 @@ class UnitSpec:
         g_i     :  inhibitory input
         dt_integ:  integration time step, in ms.
         """
-        
-        if unit.forced_act:
+
+        if unit.forced:
             return # done!
 
         # computing I_net

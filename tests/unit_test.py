@@ -19,14 +19,20 @@ class UnitTests(unittest.TestCase):
     def test_instantiate(self):
         u_spec = leabra.UnitSpec()
         u_spec.act_thr = 0.25
-        u = u_spec.instantiate()
-        u2 = u_spec.instantiate()
+        u  = leabra.Unit(spec=u_spec)
+        u2 = leabra.Unit(spec=u_spec)
         self.assertEqual(u.spec.act_thr, 0.25)
         self.assertEqual(u2.spec.act_thr, 0.25)
         u.spec.act_thr = 0.30
         self.assertEqual(u.spec.act_thr, 0.30)
         self.assertEqual(u2.spec.act_thr, 0.30)
 
+    def test_forced_act(self):
+        u = leabra.Unit()
+        u.add_excitatory(0.5, forced=True)
+        u.calculate_net_in()
+        u.cycle()
+        self.assertEqual(u.act, 0.5)
 
 
 if __name__ == '__main__':
