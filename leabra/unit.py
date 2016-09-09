@@ -1,10 +1,8 @@
 """
-Implementation of a Leabra Unit, as described in the CECN1 textbook,
-and reproducing the behavior of emergent 5.0 units.
+Implementation of a Leabra Unit, reproducing the behavior of emergent 8.0.
 
-We implement only the rate-coded version. The code is intended to be
-as simple as possible to understand. It is not in any way optimized
-for performance.
+We implement only the rate-coded version. The code is intended to be as simple
+as possible to understand. It is not in any way optimized for performance.
 """
 import copy
 
@@ -14,7 +12,7 @@ import scipy.interpolate
 
 
 class Unit:
-    """Leabra Unit (as implemented in emergent 5.0)"""
+    """Leabra Unit (as implemented in emergent 8.0)"""
 
     def __init__(self, spec=None):
         """
@@ -127,6 +125,11 @@ class UnitSpec:
             setattr(self, key, value)
 
         self._nxx1_conv = None # precomputed convolution for the noisy xx1 function
+
+
+    def copy(self):
+        """Return a copy of the spec"""
+        return copy.deepcopy(self)
 
 
     def xx1(self, v_m):
