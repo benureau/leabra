@@ -169,6 +169,11 @@ class UnitSpec:
         # computing net_raw, the total, instantaneous, excitatory input for the neuron
         net_raw = sum(unit.ex_inputs) # / max(1, len(self.ex_inputs))
         unit.ex_inputs = []
+
+        if unit.forced_act:
+            unit.act = net_raw
+            unit.forced_act = False
+            return # done!
         
         # updating net
         unit.g_e += dt_integ * self.dt_net * (net_raw - unit.g_e)  # eq 2.16
@@ -183,8 +188,6 @@ class UnitSpec:
         """
         
         if unit.forced_act:
-            unit.act = net_raw
-            unit.forced_act = False
             return # done!
 
         # computing I_net
