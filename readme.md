@@ -10,8 +10,8 @@ This work is the fruit of the collaboration of the [Computational Cognitive Neur
 
 This is a work in progress.
 
-- [ ] Unit class
-- [ ] Unit example
+- [x] Unit class
+- [x] Unit example
 - [ ] Layer class
 - [ ] Layer example
 - [ ] Connection & Projection classes

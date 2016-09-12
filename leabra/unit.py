@@ -26,13 +26,17 @@ class Unit:
         self.ex_inputs  = []    # excitatory inputs for the next cycle
         self.forced_act = False # Is activity directly set?
 
-        self.g_e   = 0
-        self.I_net = 0
-        self.v_m   = 0.15
-        self.act   = 0     # current activity
-        self.act_m = 0     # activity at the end of the minus phase
+        self.g_e     = 0
+        self.I_net   = 0
+        self.I_net_r = self.I_net
+        self.v_m     = 0.4
+        self.v_m_eq  = self.v_m
+        self.act     = 0         # current activity
+        self.act_m   = 0         # activity at the end of the minus phase
 
-        self.logs  = {'net': [], 'act': [], 'I_net': [], 'v_m': []}
+        self.adapt  = 0
+
+        self.logs  = {'net': [], 'act': [], 'I_net': [], 'v_m': [], 'v_m_eq': []}
 
 
     def cycle(self, g_i=0.0, dt_integ=1):
@@ -71,6 +75,7 @@ class Unit:
         self.logs['I_net'].append(self.I_net)
         self.logs['v_m'].append(self.v_m)
         self.logs['act'].append(self.act)
+        self.logs['v_m_eq'].append(self.v_m_eq)
 
 
     def show_config(self):
@@ -101,25 +106,28 @@ class UnitSpec:
 
     def __init__(self, **kwargs):
         # time step constants
-        self.dt_net    = 0.7   # for net update (net = g_e * g_bar_e) (eq. 2.8)
-        self.dt_vm     = 0.1   # for vm update (eq. 2.16)
-        # input channels parameters (eq. 2.8)
+        self.dt_net    = 1/1.4   # for net update (net = g_e * g_bar_e)
+        self.dt_vm     = 1/3.3   # for vm update
+        # input channels parameters
         self.g_l       = 1.0   # leak current (constant)
-        self.g_bar_e   = 0.4   # excitatory maximum conductance
+        self.g_bar_e   = 0.3   # excitatory maximum conductance
         self.g_bar_i   = 1.0   # inhibitory maximum conductance
-        self.g_bar_l   = 2.8   # leak maximum conductance
-        # reversal potential (eq. 2.8)
+        self.g_bar_l   = 0.3   # leak maximum conductance
+        # reversal potential
         self.e_rev_e   = 1.0   # excitatory
-        self.e_rev_i   = 0.15  # inhibitory
-        self.e_rev_l   = 0.15  # leak
-        # activation function parameters (eq. 2.19)
-        self.act_thr   = 0.25  # threshold
-        self.act_gain  = 600   # gain
+        self.e_rev_i   = 0.3   # inhibitory
+        self.e_rev_l   = 0.25  # leak
+        # activation function parameters
+        self.act_thr   = 0.5   # threshold
+        self.act_gain  = 40    # gain
+
+        self.spk_thr   = 1.2   # spike threshold for resetting v_m
+        self.v_m_r     = 0.3   # reset value for v_m
 
         self.bias      = 0.0
 
         self.noisy_act = False # If True, uses the noisy activation function (eq A5)
-        self.act_sd    = 0.005 # standard deviation of the noisy gaussian (eq A5)
+        self.act_sd    = 0.01  # standard deviation of the noisy gaussian (eq A5)
 
         for key, value in kwargs.items():
             setattr(self, key, value)
@@ -134,8 +142,8 @@ class UnitSpec:
 
     def xx1(self, v_m):
         """Compute the x/(x+1) function."""
-        X = self.act_gain * max((v_m - self.act_thr), 0.0)
-        return X / (X + 1) # eq 2.19
+        X = self.act_gain * max(v_m, 0.0)
+        return X / (X + 1)
 
 
     def noisy_xx1(self, v_m):
@@ -157,7 +165,7 @@ class UnitSpec:
             conv = np.convolve(xx1, gaussian, mode='same') / np.sum(gaussian)
             self._nxx1_conv = xs, conv
 
-        x = v_m - self.act_thr
+        x = v_m
         xs, conv = self._nxx1_conv
         return float(scipy.interpolate.interp1d(xs, conv, kind='linear',
                                                 fill_value='extrapolate')(x))
@@ -192,17 +200,37 @@ class UnitSpec:
         gc_e = self.g_bar_e * unit.g_e
         gc_i = self.g_bar_i * g_i
         gc_l = self.g_bar_l * self.g_l
-        unit.I_net = (  gc_e * (self.e_rev_e - unit.v_m)  # eq 2.8
-                      + gc_i * (self.e_rev_i - unit.v_m)
-                      + gc_l * (self.e_rev_l - unit.v_m))
+        unit.I_net   = (  gc_e * (self.e_rev_e - unit.v_m)
+                        + gc_i * (self.e_rev_i - unit.v_m)
+                        + gc_l * (self.e_rev_l - unit.v_m))
+        unit.I_net_r = (  gc_e * (self.e_rev_e - unit.v_m_eq)
+                        + gc_i * (self.e_rev_i - unit.v_m_eq)
+                        + gc_l * (self.e_rev_l - unit.v_m_eq))
 
-        # updating v_m
-        unit.v_m += dt_integ * self.dt_vm * unit.I_net  # eq 2.8
+        # updating v_m and v_m_eq
+        unit.v_m    += dt_integ * self.dt_vm * (unit.I_net - unit.adapt)
+        unit.v_m_eq += dt_integ * self.dt_vm * (unit.I_net_r - unit.adapt)
+
+        # reseting v_m if over the threshold (spike-like behavior)
+        if unit.v_m > self.act_thr:
+            unit.spike = 1
+            unit.v_m = self.v_m_r
+        else:
+            unit.spike = 0
+
+        # selecting the activation function, noisy or not.
+        act_fun = self.noisy_xx1 if self.noisy_act else self.xx1
+
+        # computing new_act, from v_m_eq (because rate-coded neuron)
+        if unit.v_m_eq <= self.act_thr:
+            new_act = act_fun(unit.v_m_eq - self.act_thr)
+        else:
+            g_e_thr = (  gc_i * (self.e_rev_i - self.act_thr)
+                       + gc_l * (self.e_rev_l - self.act_thr)
+                       - unit.adapt) / (self.act_thr - self.e_rev_e)
+            new_act = act_fun(gc_e - g_e_thr)
 
         # updating activity
-        if self.noisy_act:
-            unit.act = self.noisy_xx1(unit.v_m)
-        else:
-            unit.act = self.xx1(unit.v_m)
+        unit.act += dt_integ * self.dt_vm * (new_act - unit.act)
 
         unit.update_logs()

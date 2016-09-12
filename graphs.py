@@ -105,12 +105,12 @@ def xx1(xs, y_xx1, y_noisy_xx1, title='', width=400, height=400):
 def _unit_activity_aux(data):
     """Display graph of best choice"""
 
-    fig = figure(x_range=[0, 200], y_range=[-0.5, 1.0],
-                 plot_width=400, plot_height=400, tools="")
+    fig = figure(x_range=[0, 200], y_range=[-0.1, 1.0],
+                 plot_width=700, plot_height=500, tools="")
     fig.title.text = "Unit activity"
 
-    names = ('net', 'v_m', 'I_net', 'act')
-    colors = ('red', 'yellow', 'orange', 'green')
+    names = ('net', 'v_m', 'I_net', 'act', 'v_m_eq')
+    colors = ('black', 'blue', 'red', 'green', 'grey')
 
     lines = []
     for name, color in zip(names, colors):
