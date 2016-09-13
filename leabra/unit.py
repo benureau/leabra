@@ -116,12 +116,12 @@ class UnitSpec:
         self.g_bar_l    = 0.3     # leak maximum conductance
         # reversal potential
         self.e_rev_e    = 1.0     # excitatory
-        self.e_rev_i    = 0.3     # inhibitory
-        self.e_rev_l    = 0.25    # leak
+        self.e_rev_i    = 0.25    # inhibitory
+        self.e_rev_l    = 0.3     # leak
         # activation function parameters
         self.act_thr    = 0.5     # threshold
         self.act_gain   = 40      # gain
-        self.noisy_act  = False   # If True, uses the noisy activation function (eq A5)
+        self.noisy_act  = True    # If True, uses the noisy activation function (eq A5)
         self.act_sd     = 0.01    # standard deviation of the noisy gaussian (eq A5)
         # spiking behavior
         self.spk_thr    = 1.2     # spike threshold for resetting v_m # FIXME: actually used?
@@ -201,16 +201,9 @@ class UnitSpec:
         if unit.forced:
             return # done!
 
-        # computing I_net
-        gc_e = self.g_bar_e * unit.g_e
-        gc_i = self.g_bar_i * g_i
-        gc_l = self.g_bar_l * self.g_l
-        unit.I_net   = (  gc_e * (self.e_rev_e - unit.v_m)
-                        + gc_i * (self.e_rev_i - unit.v_m)
-                        + gc_l * (self.e_rev_l - unit.v_m))
-        unit.I_net_r = (  gc_e * (self.e_rev_e - unit.v_m_eq)
-                        + gc_i * (self.e_rev_i - unit.v_m_eq)
-                        + gc_l * (self.e_rev_l - unit.v_m_eq))
+        # computing I_net and I_net_r
+        unit.I_net   = self.integrate_I_net(unit.g_e, g_i, unit.v_m,    dt_integ, steps=2) # half-step integration
+        unit.I_net_r = self.integrate_I_net(unit.g_e, g_i, unit.v_m_eq, dt_integ, steps=1) # one-step integration
 
         # updating v_m and v_m_eq
         unit.v_m    += dt_integ * self.dt_vm * (unit.I_net   - unit.adapt)
@@ -230,10 +223,13 @@ class UnitSpec:
         if unit.v_m_eq <= self.act_thr:
             new_act = act_fun(unit.v_m_eq - self.act_thr)
         else:
+            gc_e = self.g_bar_e * unit.g_e
+            gc_i = self.g_bar_i * g_i
+            gc_l = self.g_bar_l * self.g_l
             g_e_thr = (  gc_i * (self.e_rev_i - self.act_thr)
                        + gc_l * (self.e_rev_l - self.act_thr)
                        - unit.adapt) / (self.act_thr - self.e_rev_e)
-            new_act = act_fun(gc_e - g_e_thr)
+            new_act = act_fun(gc_e - g_e_thr)  # gc_e == unit.net
 
         # updating activity
         unit.act += dt_integ * self.dt_vm * (new_act - unit.act)
@@ -246,3 +242,23 @@ class UnitSpec:
                           )
 
         unit.update_logs()
+
+    def integrate_I_net(self, g_e, g_i, v_m, dt_integ, steps=1):
+        """Integrate and returns I_net for the provided v_m
+
+        :param steps:  number of intermediary integration steps.
+        """
+        assert steps >= 1
+
+        gc_e = self.g_bar_e * g_e
+        gc_i = self.g_bar_i * g_i
+        gc_l = self.g_bar_l * self.g_l
+        v_m_eff = v_m
+
+        for _ in range(steps):
+            I_net = (  gc_e * (self.e_rev_e - v_m_eff)
+                     + gc_i * (self.e_rev_i - v_m_eff)
+                     + gc_l * (self.e_rev_l - v_m_eff))
+            v_m_eff += dt_integ/steps * self.dt_vm * I_net
+
+        return I_net
