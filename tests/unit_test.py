@@ -1,6 +1,8 @@
 import unittest
 import copy
 
+import numpy as np
+
 import data
 
 import dotdot  # pylint: disable=unused-import
@@ -93,6 +95,29 @@ class UnitTestsBehavior(unittest.TestCase):
         self.assertTrue(0.0 < u_spec.noisy_xx1(-0.1) < 1.0e-10 )
         self.assertTrue(0.1 < u_spec.noisy_xx1(0.1))
 
+
+    def test_emergent_neuron(self):
+        """Test quantitative equivalence with emergent on the neuron tutorial."""
+        neuron_data = data.parse_file('neuron.txt')
+
+        spec = leabra.UnitSpec(adapt_on=False, noisy_act=True)
+        receiver = leabra.Unit(spec=spec)
+
+        inputs = 10*[0.0] + 150*[1.0] + 40*[0.0]
+
+        for g_e in inputs:
+            receiver.add_excitatory(g_e)
+            receiver.calculate_net_in()
+            receiver.cycle()
+
+        check = True
+        for name in receiver.logs.keys():
+            for t, (py, em) in enumerate(zip(receiver.logs[name], neuron_data[name])):
+                if not np.allclose(py, em, rtol=1e-05, atol=1e-07):
+                    print('{}:{} [py] {:.10f} != {:.10f} [emergent]'.format(name, t, py, em))
+                    check = False
+
+        self.assertTrue(check)
 
 
 if __name__ == '__main__':
