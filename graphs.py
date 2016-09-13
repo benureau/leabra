@@ -114,7 +114,11 @@ def _unit_activity_aux(data):
 
     lines = []
     for name, color in zip(names, colors):
-        line = fig.line(range(201), data[name], color=color, line_width=2)
+        line_dash = 'solid'
+        if name == 'v_m_eq':
+            line_dash = 'dashed'
+        line = fig.line(range(201), data[name], color=color, line_width=2,
+                                                             line_dash=line_dash)
         lines.append(line)
 
     legend = Legend(legends=[(name, [line]) for name, line in zip(names, lines)],

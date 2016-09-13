@@ -12,6 +12,7 @@ This is a work in progress.
 
 - [x] Unit class
 - [x] Unit example
+- [ ] Quantitative Unit equivalence with emergent  
 - [ ] Layer class
 - [ ] Layer example
 - [ ] Connection & Projection classes

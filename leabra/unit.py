@@ -34,7 +34,8 @@ class Unit:
         self.act     = 0         # current activity
         self.act_m   = 0         # activity at the end of the minus phase
 
-        self.adapt  = 0
+        self.adapt    = 0     # adaptation current: causes the rate of activation
+                              # to decrease over time
 
         self.logs  = {'net': [], 'act': [], 'I_net': [], 'v_m': [], 'v_m_eq': []}
 
@@ -106,28 +107,32 @@ class UnitSpec:
 
     def __init__(self, **kwargs):
         # time step constants
-        self.dt_net    = 1/1.4   # for net update (net = g_e * g_bar_e)
-        self.dt_vm     = 1/3.3   # for vm update
+        self.dt_net     = 1/1.4   # for net update (net = g_e * g_bar_e)
+        self.dt_vm      = 1/3.3   # for vm update
         # input channels parameters
-        self.g_l       = 1.0   # leak current (constant)
-        self.g_bar_e   = 0.3   # excitatory maximum conductance
-        self.g_bar_i   = 1.0   # inhibitory maximum conductance
-        self.g_bar_l   = 0.3   # leak maximum conductance
+        self.g_l        = 1.0     # leak current (constant)
+        self.g_bar_e    = 0.3     # excitatory maximum conductance
+        self.g_bar_i    = 1.0     # inhibitory maximum conductance
+        self.g_bar_l    = 0.3     # leak maximum conductance
         # reversal potential
-        self.e_rev_e   = 1.0   # excitatory
-        self.e_rev_i   = 0.3   # inhibitory
-        self.e_rev_l   = 0.25  # leak
+        self.e_rev_e    = 1.0     # excitatory
+        self.e_rev_i    = 0.3     # inhibitory
+        self.e_rev_l    = 0.25    # leak
         # activation function parameters
-        self.act_thr   = 0.5   # threshold
-        self.act_gain  = 40    # gain
-
-        self.spk_thr   = 1.2   # spike threshold for resetting v_m
-        self.v_m_r     = 0.3   # reset value for v_m
-
-        self.bias      = 0.0
-
-        self.noisy_act = False # If True, uses the noisy activation function (eq A5)
-        self.act_sd    = 0.01  # standard deviation of the noisy gaussian (eq A5)
+        self.act_thr    = 0.5     # threshold
+        self.act_gain   = 40      # gain
+        self.noisy_act  = False   # If True, uses the noisy activation function (eq A5)
+        self.act_sd     = 0.01    # standard deviation of the noisy gaussian (eq A5)
+        # spiking behavior
+        self.spk_thr    = 1.2     # spike threshold for resetting v_m # FIXME: actually used?
+        self.v_m_r      = 0.3     # reset value for v_m
+        # adapt behavior
+        self.adapt_on   = False   # if True, enable the adapt behavior
+        self.dt_adapt   = 1/144.  # time-step constant for adapt update
+        self.vm_gain    = 0.04    # FIXME: desc
+        self.spike_gain = 0.00805 # FIXME: desc
+        # bias #FIXME: not implemented.
+        self.bias       = 0.0
 
         for key, value in kwargs.items():
             setattr(self, key, value)
@@ -208,7 +213,7 @@ class UnitSpec:
                         + gc_l * (self.e_rev_l - unit.v_m_eq))
 
         # updating v_m and v_m_eq
-        unit.v_m    += dt_integ * self.dt_vm * (unit.I_net - unit.adapt)
+        unit.v_m    += dt_integ * self.dt_vm * (unit.I_net   - unit.adapt)
         unit.v_m_eq += dt_integ * self.dt_vm * (unit.I_net_r - unit.adapt)
 
         # reseting v_m if over the threshold (spike-like behavior)
@@ -232,5 +237,12 @@ class UnitSpec:
 
         # updating activity
         unit.act += dt_integ * self.dt_vm * (new_act - unit.act)
+
+        # updating adaptation
+        if self.adapt_on:
+            unit.adapt += dt_integ * (
+                            self.dt_adapt * (self.vm_gain * (unit.v_m - self.e_rev_l) - unit.adapt)
+                            + unit.spike * self.spike_gain
+                          )
 
         unit.update_logs()
