@@ -5,7 +5,7 @@ import statistics
 class Layer:
     """Leabra Layer class"""
 
-    def __init__(self, size, spec=None, unit_spec=None):
+    def __init__(self, size, spec=None, unit_spec=None, name=None):
         """
         size     :  Number of units in the layer.
         spec     :  LayerSpec instance with custom values for the parameter of
@@ -13,6 +13,7 @@ class Layer:
         unit_spec:  UnitSpec instance with custom values for the parameters of
                     the units of the layer. If None, default values will be used.
         """
+        self.name = name
         self.spec = spec
         if self.spec is None:
             self.spec = LayerSpec()
