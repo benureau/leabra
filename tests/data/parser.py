@@ -11,7 +11,7 @@ def parse_unit(filename):
     return parse_file(filename, unit_fmt)
 
 def parse_xy(filename):
-    return parse_file(filename, {'x': int, 'y': int})
+    return parse_file(filename, {'x': float, 'y': float})
 
 
 def parse_file(filename, fmt):
@@ -34,9 +34,11 @@ def parse_file(filename, fmt):
     for line in lines[1:]:
         assert len(line) == 0 or line.startswith('_D:'), 'Unrecognized format {}'.format(filepath)
 
-    header = lines[0].split('\t')
-    header = [name[1:] for name in header[1:]]
-
+    header = []
+    for name in lines[0].split('\t')[1:]:
+        if name.startswith('%') or name.startswith('|'):
+            name = name[1:]
+        header.append(name)
     assert set(header).issubset(set(list(fmt.keys())))
 
     data = {name: [] for name in header}

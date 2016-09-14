@@ -85,6 +85,8 @@ class UnitTestsBehavior(unittest.TestCase):
         self.assertTrue(u.act < 0.05)
 
 
+
+
     def test_xx1_thr(self):
         """Test the threshold for xx1 functions"""
         u_spec = leabra.UnitSpec()
@@ -92,9 +94,28 @@ class UnitTestsBehavior(unittest.TestCase):
         u = leabra.Unit(spec=u_spec)
         self.assertEqual(u_spec.xx1(-0.1), 0.0)
         self.assertTrue(0.0 < u_spec.xx1(0.1))
-#        print(u_spec.noisy_xx1(-0.1))
-#        self.assertTrue(0.0 < u_spec.noisy_xx1(-0.1) < 1.0e-10 )
+        self.assertEqual(u_spec.noisy_xx1(-0.1), 0.0)
         self.assertTrue(0.1 < u_spec.noisy_xx1(0.1))
+
+    def test_emergent_xx1(self):
+        """Test quantitative equivalence with emergent on the xx1 function."""
+        xx1_data = data.parse_xy('convolve_nxx1.txt')
+
+        spec = leabra.UnitSpec(adapt_on=False, noisy_act=True)
+        receiver = leabra.Unit(spec=spec)
+        receiver.cycle() # create the noisy_xx1 convolution
+
+        xs, ys = spec._nxx1_conv
+
+        check = True
+        for k, (pys, ems) in enumerate([(xs, xx1_data['x']), (ys, xx1_data['y'])]):
+            for t, (py, em) in enumerate(zip(pys, ems)):
+                if not np.allclose(py, em, rtol=1e-05, atol=1e-08):
+                    print('{}:{} [py] {:.10f} != {:.10f} [emergent]'.format('x' if k==0 else 'y', t, py, em))
+                    check = False
+
+        self.assertTrue(check)
+
 
 
     def test_emergent_neuron(self):

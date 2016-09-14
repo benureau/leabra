@@ -24,7 +24,8 @@ class Unit:
             self.spec = UnitSpec()
 
         self.ex_inputs  = []    # excitatory inputs for the next cycle
-        self.forced_act = False # Is activity directly set?
+        self.forced     = False # Is activity directly set?
+        self.forced_act = None  # if forced, act == forced_act
 
         self.g_e     = 0
         self.I_net   = 0
