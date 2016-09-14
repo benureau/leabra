@@ -44,6 +44,7 @@ class Unit:
         self.avg_s     = 0.15
         self.avg_m     = 0.15
         self.avg_l     = 0.15 # FIXME: may be different, investigate `avg_l.init`
+        self.avg_l_lrn = 1.0
         self.avg_s_eff = 0.0
 
         self.logs  = {name: [] for name in log_names}
