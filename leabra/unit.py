@@ -32,10 +32,18 @@ class Unit:
         self.v_m     = 0.4
         self.v_m_eq  = self.v_m
         self.act     = 0         # current activity
-        self.act_m   = 0         # activity at the end of the minus phase
+        self.act_m   = self.act  # activity at the end of the minus phase
+        self.act_nd  = self.act  # non-depressed activity # FIXME: not implemented yet
 
-        self.adapt    = 0     # adaptation current: causes the rate of activation
+        self.adapt   = 0     # adaptation current: causes the rate of activation
                               # to decrease over time
+
+        # averages
+        self.avg_ss    = 0.15 # FIXME: why 0.15?
+        self.avg_s     = 0.15
+        self.avg_m     = 0.15
+        self.avg_l     = 0.15 # FIXME: may be different, investigate `avg_l.init`
+        self.avg_s_eff = 0.0
 
         self.logs  = {name: [] for name in log_names}
 
@@ -130,6 +138,14 @@ class UnitSpec:
         self.spike_gain = 0.00805 # FIXME: desc
         # bias #FIXME: not implemented.
         self.bias       = 0.0
+        # average parameters
+        self.avg_ss_dt  = 0.5
+        self.avg_s_dt   = 0.5
+        self.avg_m_dt   = 0.1
+        self.avg_l_dt   = 0.1 # computed once every trial
+        self.avg_l_min  = 0.1
+        self.avg_l_max  = 1.5
+        self.avg_m_in_s = 0.1
 
         for key, value in kwargs.items():
             setattr(self, key, value)
@@ -248,7 +264,8 @@ class UnitSpec:
             new_act = act_fun(gc_e - g_e_thr)  # gc_e == unit.net
 
         # updating activity
-        unit.act += dt_integ * self.dt_vm * (new_act - unit.act)
+        unit.act_nd += dt_integ * self.dt_vm * (new_act - unit.act_nd)
+        unit.act = unit.act_nd # FIXME: implement stp
 
         # updating adaptation
         if self.adapt_on:
@@ -257,7 +274,25 @@ class UnitSpec:
                             + unit.spike * self.spike_gain
                           )
 
+        self.update_avgs(unit, dt_integ)
         unit.update_logs()
+
+    def update_avgs(self, unit, dt_integ):
+        """Update all averages except long-term, at the end of every cycle."""
+        unit.avg_ss += dt_integ * self.avg_ss_dt * (unit.act_nd - unit.avg_ss)
+        unit.avg_s  += dt_integ * self.avg_s_dt  * (unit.avg_ss - unit.avg_s )
+        unit.avg_m  += dt_integ * self.avg_m_dt  * (unit.avg_s  - unit.avg_m )
+        unit.avg_s_eff = self.avg_m_in_s * unit.avg_m + (1 - self.avg_m_in_s) * unit.avg_s
+
+    def update_avg_l(self, dt_integ):
+        """Update the long-term average.
+
+        Called at the end of every trial (*not every cycle*).
+        """
+        if unit_avg_m > 0.2: # FIXME: 0.2 is a magic number here
+            unit.avg_l += self.avg_l_dt * (self.avg_l_max - unit.avg_m)
+        else:
+            unit.avg_l += self.avg_l_dt * (self.avg_l_min - unit.avg_m)
 
     def integrate_I_net(self, unit, g_i, dt_integ, ratecoded=True, steps=1):
         """Integrate and returns I_net for the provided v_m

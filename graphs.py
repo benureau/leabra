@@ -102,18 +102,24 @@ def xx1(xs, y_xx1, y_noisy_xx1, title='', width=400, height=400):
     fig.legend.location = 'right_center'
     bkp.show(fig)
 
-def _unit_activity_aux(data):
+
+default_names = ('net', 'v_m', 'I_net', 'act', 'v_m_eq', 'adapt')
+
+def _unit_activity_aux(data, names=default_names):
     """Display graph of best choice"""
 
     fig = figure(x_range=[0, 200], y_range=[-0.1, 1.0],
-                 plot_width=700, plot_height=500, tools="")
+                 plot_width=700, plot_height=450, tools="")
     fig.title.text = "Unit activity"
 
-    names = ('net', 'v_m', 'I_net', 'act', 'v_m_eq', 'adapt')
-    colors = ('black', 'blue', 'red', 'green', 'grey', 'darkred')
+    colors = {'net':'black', 'v_m':'blue', 'I_net':'red', 'act':'green',
+              'v_m_eq':'grey', 'adapt':'darkred',
+              'avg_ss': 'cyan', 'avg_s': 'blue',
+              'avg_m': 'red', 'avg_s_eff': 'orange'}
 
     lines = []
-    for name, color in zip(names, colors):
+    for name in names:
+        color = colors[name]
         line_dash = 'solid'
         if name == 'v_m_eq':
             line_dash = 'dashed'
@@ -128,12 +134,12 @@ def _unit_activity_aux(data):
 
     return fig, [line.data_source.data for line in lines]
 
-def unit_activity(data):
+def unit_activity(data, names=default_names):
     """Display graph of best choice"""
-    fig, lines = _unit_activity_aux(data)
+    fig, lines = _unit_activity_aux(data, names=names)
     bkp.show(fig)
 
-def unit_activity_interactive(data, figdata=None):
+def unit_activity_interactive(data, names=default_names, figdata=None):
     if figdata is None:
         fig, lines = _unit_activity_aux(data)
         bkp.show(fig)
