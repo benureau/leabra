@@ -1,6 +1,19 @@
 import os
 
-def parse_file(filename):
+
+unit_fmt = {'cycle': int, 'net': float, 'I_net': float, 'v_m': float,
+            'act': float, 'act_eq': float, 'spike': int, 'adapt': float,
+            'syn_tr': float, 'syn_pr': float, 'syn_nr': float, 'syn_kre': float,
+            'vm_eq': float}
+
+def parse_unit(filename):
+    return parse_file(filename, unit_fmt)
+
+def parse_xy(filename):
+    return parse_file(filename, {'x': int, 'y': int})
+
+
+def parse_file(filename, fmt):
     """Return the data file as a dict
 
     `vm_eq` is renamed in `v_m_eq`.
@@ -23,10 +36,6 @@ def parse_file(filename):
     header = lines[0].split('\t')
     header = [name[1:] for name in header[1:]]
 
-    fmt = {'cycle': int, 'net': float, 'I_net': float, 'v_m': float,
-           'act': float, 'act_eq': float, 'spike': int, 'adapt': float,
-           'syn_tr': float, 'syn_pr': float, 'syn_nr': float, 'syn_kre': float,
-           'vm_eq': float}
     assert set(list(fmt.keys())) == set(header)
 
     data = {name: [] for name in header}
@@ -39,7 +48,8 @@ def parse_file(filename):
             for name, v in zip(header, values):
                 data[name].append(fmt[name](v))
 
-    data['v_m_eq'] = data.pop('vm_eq')
+    if 'vm_eq' in data:
+        data['v_m_eq'] = data.pop('vm_eq')
     return data
 
 if __name__ == '__main__':

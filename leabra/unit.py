@@ -86,7 +86,7 @@ class Unit:
                      'e_rev_e', 'e_rev_l', 'e_rev_i', 'act_thr', 'act_gain']:
             print('   {}: {:.2f}'.format(name, getattr(self.spec, name)))
         print('State:')
-        for name in ['g_e', 'I_net', 'v_m', 'act']:
+        for name in ['g_e', 'I_net', 'v_m', 'act', 'v_m_eq']:
             print('   {}: {:.2f}'.format(name, getattr(self, name)))
 
 
@@ -121,8 +121,8 @@ class UnitSpec:
         # activation function parameters
         self.act_thr    = 0.5     # threshold
         self.act_gain   = 40      # gain
-        self.noisy_act  = True    # If True, uses the noisy activation function (eq A5)
-        self.act_sd     = 0.01    # standard deviation of the noisy gaussian (eq A5)
+        self.noisy_act  = True    # If True, uses the noisy activation function
+        self.act_sd     = 0.01    # standard deviation of the noisy gaussian
         # spiking behavior
         self.spk_thr    = 1.2     # spike threshold for resetting v_m # FIXME: actually used?
         self.v_m_r      = 0.3     # reset value for v_m
@@ -160,20 +160,39 @@ class UnitSpec:
         the desired point every time the function is called.
         """
         if self._nxx1_conv is None:  # convolution not precomputed yet
-            xs = np.linspace(-2.0, 2.0, 2000)  # x represents (self.v_m - self.spec.act_thr)
+            res = 0.001 # resolution of the precomputed array
+
+            # computing the gaussian
+            ns_rng = max(3.0 * self.act_sd, res)
+            xs = np.arange(-ns_rng, ns_rng+res, res)  # x represents self.v_m
+            var = max(self.act_sd, 1.0e-6)**2
+            gaussian = np.exp(-xs**2 / var)   # computing unscaled guassian
+            gaussian = gaussian/sum(gaussian) # normalization
+
+            # computing xx1 function
+            xs = np.arange(-2*ns_rng, 1.0 + ns_rng + res, res)  # x represents self.v_m
             X  = self.act_gain * np.maximum(xs, 0)
             xx1 = X / (X + 1)  # regular x/(x+1) function over xs
 
-            gaussian = (np.exp(-xs**2 / (2 * self.act_sd**2)) /
-                        (self.act_sd * np.sqrt(2 * np.pi)))
+            # convolution
+            conv = np.convolve(xx1, gaussian, mode='same')
 
-            conv = np.convolve(xx1, gaussian, mode='same') / np.sum(gaussian)
-            self._nxx1_conv = xs, conv
+            # cutting to valid range
+            xs_valid = np.arange(-ns_rng, 1.0 + res, res)  # x represents self.v_m
+            conv = conv[np.searchsorted(xs, xs_valid[0],  side='left'):
+                        np.searchsorted(xs, xs_valid[-1], side='left')+1]
+            assert len(xs_valid) == len(conv)
 
-        x = v_m
+            self._nxx1_conv = xs_valid, conv
+
         xs, conv = self._nxx1_conv
-        return float(scipy.interpolate.interp1d(xs, conv, kind='linear',
-                                                fill_value='extrapolate')(x))
+        if v_m < xs[0]:
+            return 0.0
+        elif v_m > xs[-1]:
+            return self.xx1(xs)
+        else:
+            return float(scipy.interpolate.interp1d(xs, conv, kind='linear',
+                                                    fill_value='extrapolate')(v_m))
 
 
     def calculate_net_in(self, unit, dt_integ=1):
