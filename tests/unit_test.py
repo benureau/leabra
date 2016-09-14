@@ -103,7 +103,9 @@ class UnitTestsBehavior(unittest.TestCase):
             neuron_data = data.parse_unit('neuron_adapt.txt' if adapt_on else 'neuron.txt')
 
             spec = leabra.UnitSpec(adapt_on=adapt_on, noisy_act=True)
-            receiver = leabra.Unit(spec=spec)
+            log_names=('net', 'I_net', 'v_m', 'act', 'v_m_eq', 'adapt',
+                       'avg_ss', 'avg_s', 'avg_m', 'avg_s_eff', 'avg_l')
+            receiver = leabra.Unit(spec=spec, log_names=log_names)
 
             inputs = 10*[0.0] + 150*[1.0] + 40*[0.0]
 

@@ -1,10 +1,11 @@
 import os
 
 
-unit_fmt = {'cycle': int, 'net': float, 'I_net': float, 'v_m': float,
-            'act': float, 'act_eq': float, 'spike': int, 'adapt': float,
+unit_fmt = {'cycle': int, 'net': float, 'I_net': float,
+            'act': float, 'act_eq': float, 'act_nd': float,
+            'v_m': float, 'vm_eq': float, 'spike': int, 'adapt': float,
             'syn_tr': float, 'syn_pr': float, 'syn_nr': float, 'syn_kre': float,
-            'vm_eq': float}
+            'avg_ss': float, 'avg_s': float, 'avg_m': float, 'avg_s_eff': float, 'avg_l': float}
 
 def parse_unit(filename):
     return parse_file(filename, unit_fmt)
@@ -36,7 +37,7 @@ def parse_file(filename, fmt):
     header = lines[0].split('\t')
     header = [name[1:] for name in header[1:]]
 
-    assert set(list(fmt.keys())) == set(header)
+    assert set(header).issubset(set(list(fmt.keys())))
 
     data = {name: [] for name in header}
 
