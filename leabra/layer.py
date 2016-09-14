@@ -21,8 +21,9 @@ class Layer:
         self.size = size
         self.units = [Unit(spec=unit_spec) for _ in range(self.size)]
 
-        self.g_i = 0.0
+        self.gc_i = 0.0
         self.fbi = 0.0
+        self.ffi = 0.0
 
         self.connections = []
 
@@ -30,6 +31,17 @@ class Layer:
     def activities(self):
         """Return the matrix of the units's activities"""
         return [u.act for u in self.units]
+
+    @property
+    def g_e(self):
+        """Return the matrix of the units's net exitatory input"""
+        return [u.g_e for u in self.units]
+
+    @property
+    def I_Net(self):
+        """Return the matrix of the units's net exitatory input"""
+        return [u.I_net for u in self.units]
+
 
     def set_activities(self, inputs):
         """Set the units's activities equal to the inputs"""
@@ -45,6 +57,15 @@ class Layer:
 
     def cycle(self):
         self.spec.cycle(self)
+
+    def show_config(self):
+        """Display the value of constants and state variables."""
+        print('Parameters:')
+        for name in ['fb_dt', 'ff0', 'ff', 'fb', 'gi']:
+            print('   {}: {:.2f}'.format(name, getattr(self.spec, name)))
+        print('State:')
+        for name in ['gc_i', 'fbi', 'ffi']:
+            print('   {}: {:.2f}'.format(name, getattr(self, name)))
 
 
 
@@ -99,8 +120,8 @@ class LayerSpec:
             u.calculate_net_in()
 
         """Update the state of the layer"""
-        self.g_i = self._inhibition(layer)
+        layer.gc_i = self._inhibition(layer)
         
         for u in layer.units:
-            u.cycle(g_i=self.g_i)
+            u.cycle(g_i=layer.gc_i)
         

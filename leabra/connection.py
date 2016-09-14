@@ -128,4 +128,4 @@ class ConnectionSpec:
         if self.proj == 'full':
             self._full_projection(connection)
         if self.proj == '1to1':
-            self._1to1_project(connection)
+            self._1to1_projection(connection)
