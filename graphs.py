@@ -109,8 +109,8 @@ def _unit_activity_aux(data):
                  plot_width=700, plot_height=500, tools="")
     fig.title.text = "Unit activity"
 
-    names = ('net', 'v_m', 'I_net', 'act', 'v_m_eq')
-    colors = ('black', 'blue', 'red', 'green', 'grey')
+    names = ('net', 'v_m', 'I_net', 'act', 'v_m_eq', 'adapt')
+    colors = ('black', 'blue', 'red', 'green', 'grey', 'darkred')
 
     lines = []
     for name, color in zip(names, colors):

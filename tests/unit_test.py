@@ -99,26 +99,28 @@ class UnitTestsBehavior(unittest.TestCase):
 
     def test_emergent_neuron(self):
         """Test quantitative equivalence with emergent on the neuron tutorial."""
-        neuron_data = data.parse_unit('neuron.txt')
+        for adapt_on in [False, True]:
+            neuron_data = data.parse_unit('neuron_adapt.txt' if adapt_on else 'neuron.txt')
 
-        spec = leabra.UnitSpec(adapt_on=False, noisy_act=True)
-        receiver = leabra.Unit(spec=spec)
+            spec = leabra.UnitSpec(adapt_on=adapt_on, noisy_act=True)
+            receiver = leabra.Unit(spec=spec)
 
-        inputs = 10*[0.0] + 150*[1.0] + 40*[0.0]
+            inputs = 10*[0.0] + 150*[1.0] + 40*[0.0]
 
-        for g_e in inputs:
-            receiver.add_excitatory(g_e)
-            receiver.calculate_net_in()
-            receiver.cycle()
+            for g_e in inputs:
+                receiver.add_excitatory(g_e)
+                receiver.calculate_net_in()
+                receiver.cycle()
 
-        check = True
-        for name in receiver.logs.keys():
-            for t, (py, em) in enumerate(zip(receiver.logs[name], neuron_data[name])):
-                if not np.allclose(py, em, rtol=1e-05, atol=1e-07):
-                    print('{}:{} [py] {:.10f} != {:.10f} [emergent]'.format(name, t, py, em))
-                    check = False
+            check = True
+            for name in receiver.logs.keys():
+                for t, (py, em) in enumerate(zip(receiver.logs[name], neuron_data[name])):
+                    if not np.allclose(py, em, rtol=1e-05, atol=1e-07):
+                        print('{}:{} [py] {:.10f} != {:.10f} [emergent] ({}adapt)'.format(
+                               name, t,   py,        em,                 '' if adapt_on else 'no '))
+                        check = False
 
-        self.assertTrue(check)
+            self.assertTrue(check)
 
 
 if __name__ == '__main__':

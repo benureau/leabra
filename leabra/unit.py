@@ -14,7 +14,7 @@ import scipy.interpolate
 class Unit:
     """Leabra Unit (as implemented in emergent 8.0)"""
 
-    def __init__(self, spec=None):
+    def __init__(self, spec=None, log_names=('net', 'I_net', 'v_m', 'act', 'v_m_eq', 'adapt')):
         """
         spec:  UnitSpec instance with custom values for the unit parameters.
                If None, default values will be used.
@@ -37,7 +37,7 @@ class Unit:
         self.adapt    = 0     # adaptation current: causes the rate of activation
                               # to decrease over time
 
-        self.logs  = {'net': [], 'act': [], 'I_net': [], 'v_m': [], 'v_m_eq': []}
+        self.logs  = {name: [] for name in log_names}
 
 
     def cycle(self, g_i=0.0, dt_integ=1):
@@ -72,11 +72,8 @@ class Unit:
 
     def update_logs(self):
         """Record current state. Called after each cycle."""
-        self.logs['net'].append(self.net)
-        self.logs['I_net'].append(self.I_net)
-        self.logs['v_m'].append(self.v_m)
-        self.logs['act'].append(self.act)
-        self.logs['v_m_eq'].append(self.v_m_eq)
+        for name in self.logs.keys():
+            self.logs[name].append(getattr(self, name))
 
 
     def show_config(self):
@@ -221,12 +218,12 @@ class UnitSpec:
             return # done!
 
         # computing I_net and I_net_r
-        unit.I_net   = self.integrate_I_net(unit.g_e, g_i, unit.v_m,    dt_integ, steps=2) # half-step integration
-        unit.I_net_r = self.integrate_I_net(unit.g_e, g_i, unit.v_m_eq, dt_integ, steps=1) # one-step integration
+        unit.I_net   = self.integrate_I_net(unit, g_i, dt_integ, ratecoded=False, steps=2) # half-step integration
+        unit.I_net_r = self.integrate_I_net(unit, g_i, dt_integ, ratecoded=True,  steps=1) # one-step integration
 
         # updating v_m and v_m_eq
-        unit.v_m    += dt_integ * self.dt_vm * (unit.I_net   - unit.adapt)
-        unit.v_m_eq += dt_integ * self.dt_vm * (unit.I_net_r - unit.adapt)
+        unit.v_m    += dt_integ * self.dt_vm * unit.I_net   # - unit.adapt is done on the I_net value.
+        unit.v_m_eq += dt_integ * self.dt_vm * unit.I_net_r
 
         # reseting v_m if over the threshold (spike-like behavior)
         if unit.v_m > self.act_thr:
@@ -262,22 +259,24 @@ class UnitSpec:
 
         unit.update_logs()
 
-    def integrate_I_net(self, g_e, g_i, v_m, dt_integ, steps=1):
+    def integrate_I_net(self, unit, g_i, dt_integ, ratecoded=True, steps=1):
         """Integrate and returns I_net for the provided v_m
 
         :param steps:  number of intermediary integration steps.
         """
         assert steps >= 1
 
-        gc_e = self.g_bar_e * g_e
+        gc_e = self.g_bar_e * unit.g_e
         gc_i = self.g_bar_i * g_i
         gc_l = self.g_bar_l * self.g_l
-        v_m_eff = v_m
+        v_m_eff = unit.v_m_eq if ratecoded else unit.v_m
+        adapt   = 0.0         if ratecoded else unit.adapt
 
         for _ in range(steps):
             I_net = (  gc_e * (self.e_rev_e - v_m_eff)
                      + gc_i * (self.e_rev_i - v_m_eff)
-                     + gc_l * (self.e_rev_l - v_m_eff))
+                     + gc_l * (self.e_rev_l - v_m_eff)
+                     - unit.adapt)
             v_m_eff += dt_integ/steps * self.dt_vm * I_net
 
         return I_net
