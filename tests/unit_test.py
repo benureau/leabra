@@ -85,8 +85,6 @@ class UnitTestsBehavior(unittest.TestCase):
         self.assertTrue(u.act < 0.05)
 
 
-
-
     def test_xx1_thr(self):
         """Test the threshold for xx1 functions"""
         u_spec = leabra.UnitSpec()
@@ -96,6 +94,20 @@ class UnitTestsBehavior(unittest.TestCase):
         self.assertTrue(0.0 < u_spec.xx1(0.1))
         self.assertEqual(u_spec.noisy_xx1(-0.1), 0.0)
         self.assertTrue(0.1 < u_spec.noisy_xx1(0.1))
+
+
+    def test_avgs_forced(self):
+        """Test if units with forced activity update their averages"""
+        u = leabra.Unit()
+
+        for t in range(10):
+            u.add_excitatory(1.0, forced=True)
+            u.calculate_net_in()
+            u.cycle()
+
+        for name in ['avg_ss', 'avg_s', 'avg_m', 'avg_s_eff']:
+            self.assertTrue(getattr(u, name) != 0.15)
+
 
     def test_emergent_xx1(self):
         """Test quantitative equivalence with emergent on the xx1 function."""
@@ -115,7 +127,6 @@ class UnitTestsBehavior(unittest.TestCase):
                     check = False
 
         self.assertTrue(check)
-
 
 
     def test_emergent_neuron(self):

@@ -214,7 +214,7 @@ class UnitSpec:
     def calculate_net_in(self, unit, dt_integ=1):
         """Calculate the net input for the unit. To execute before cycle()"""
         if unit.forced:
-            unit.act = unit.forced_act
+            assert len(unit.ex_inputs) == 0  # catching mistakes
             return # done!
 
         # computing net_raw, the total, instantaneous, excitatory input for the neuron
@@ -234,6 +234,9 @@ class UnitSpec:
         """
 
         if unit.forced:
+            unit.act = unit.forced_act
+            self.update_avgs(unit, dt_integ)
+            unit.update_logs()
             return # done!
 
         # computing I_net and I_net_r
