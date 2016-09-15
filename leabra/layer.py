@@ -74,15 +74,8 @@ class Layer:
 class LayerSpec:
     """Layer parameters"""
 
-    #!#legal_inhib = 'kwta', 'kwta_avg'  # available values for self.inhib
-
     def __init__(self, **kwargs):
-        #!#self.inhib    = 'kwta'   # inhibition rule: 'kwta' or 'kwta_avg'
-        #!#self.k        = None     # number of active units.
-        #!#self.kwta_pct = 0.25     # proportion of active units; used to compute k
-                                 # only if self.k is None.
-        #!#self.q        = 0.25     # see eq. A6
-        #
+        """Initialize a LayerSpec"""
 
         # time step constants:
         self.fb_dt = 1/1.4          # Integration constant for feed back inhibition
@@ -96,6 +89,7 @@ class LayerSpec:
         self.ff0 = 0.1
 
         for key, value in kwargs.items():
+            assert hasattr(self, key) # making sure the parameter exists.
             setattr(self, key, value)
 
     def _inhibition(self, layer):

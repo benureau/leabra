@@ -22,10 +22,10 @@ class Connection:
             pre_layer   the layer sending its activity.
             post_layer  the layer receiving the activity.
         """
-        self.pre  = pre_layer
-        self.post = post_layer
+        self.pre   = pre_layer
+        self.post  = post_layer
         self.links = []
-        self.spec = spec
+        self.spec  = spec
         if self.spec is None:
             self.spec = ConnectionSpec()
         assert (self.spec.lrule is None or
@@ -68,26 +68,27 @@ class ConnectionSpec:
 
     def __init__(self, **kwargs):
         """Connnection parameters"""
-        self.st    = 1.0     # connection strength
-        self.force = False   # activity are set directly in the post_layer
-        self.inhib = False   # if True, inhibitory connection
-        self.w0    = 1.0     # intial weights
-        self.proj  = 'full'  # connection pattern between units.
-                             # Can be 'Full' or '1to1'. In the latter case,
-                             # the layers must have the same size.
-        self.lrule = None    # the learning rule to use. Possible values are
-                             # 'delta', 'xcal' and None.
-        self.lrate = 0.01    # learning rate
+        self.st       = 1.0     # connection strength
+        self.force    = False   # activity are set directly in the post_layer
+        self.inhib    = False   # if True, inhibitory connection
+        self.w0       = 1.0     # intial weights
+        self.proj     = 'full'  # connection pattern between units.
+                                # Can be 'Full' or '1to1'. In the latter case,
+                                # the layers must have the same size.
+        self.lrule    = None    # the learning rule to use. Possible values are
+                                # 'delta', 'xcal' and None.
+        self.lrate    = 0.01    # learning rate
 
-        self.m_lrn = 1.0     # weighting of the error driven learning
+        self.m_lrn    = 1.0     # weighting of the error driven learning
 
-        self.d_thr = 0.0001
-        self.d_rev = 0.1
+        self.d_thr    = 0.0001
+        self.d_rev    = 0.1
 
-        self.sig_off = 0.0
+        self.sig_off  = 0.0
         self.sig_gain = 1.0
 
         for key, value in kwargs.items():
+            assert hasattr(self, key) # making sure the parameter exists.
             setattr(self, key, value)
 
     def cycle(self, connection):
@@ -147,7 +148,7 @@ class ConnectionSpec:
             srm = link.post.avg_m*link.pre.avg_m
 
             link.dwt += self.lrate * ( self.m_lrn * self.xcal(srs,srm) + link.post.avg_l_lrn * self.xcal(srs, link.post.avg_l))
-            
+
     def delta_lrule(self, connection):
         """Delta learning rule.
 

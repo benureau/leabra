@@ -150,6 +150,7 @@ class UnitSpec:
         self.avg_m_in_s = 0.1
 
         for key, value in kwargs.items():
+            assert hasattr(self, key) # making sure the parameter exists.
             setattr(self, key, value)
 
         self._nxx1_conv = None # precomputed convolution for the noisy xx1 function
