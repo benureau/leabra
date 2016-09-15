@@ -9,16 +9,13 @@ import dotdot  # pylint: disable=unused-import
 import leabra
 
 
-
-
-class UnitTestsBehavior(unittest.TestCase):
+class LayerTestsBehavior(unittest.TestCase):
     """Check that the Layer behaves as they should.
 
     The checks are concerned with consistency with the equation that define the
     layer's behavior. These test should pass on the emergent implementation as
     well.
     """
-
 
     def test_emergent_layer(self):
         """Test quantitative equivalence with emergent on a basic layer inhibition project."""
@@ -30,16 +27,16 @@ class UnitTestsBehavior(unittest.TestCase):
 
         src_layer = leabra.Layer(10,spec=layer_spec0, unit_spec=unit_spec0)
         dst_layer = leabra.Layer(10,spec=layer_spec0, unit_spec= unit_spec0)
-            
+
         connection0 = leabra.Connection(src_layer,dst_layer, spec=connection_spec0)
 
-        input_pattern = [1.0,0,1.0,0,1.0,0,1.0,0,1.0,0]
+        input_pattern = 5 * [1.0, 0.0]
 
         for i in range(200):
             if ((i >= 10) and (i < 160)):
                 src_layer.add_excitatory(input_pattern, forced=True)
             else:
-                src_layer.add_excitatory([0,0,0,0,0,0,0,0,0,0], forced=True)
+                src_layer.add_excitatory(10 * [0.0], forced=True)
             src_layer.cycle()
             dst_layer.cycle()
 

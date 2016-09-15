@@ -50,7 +50,7 @@ class Layer:
         for u, inp in zip(self.units, inputs):
             u.act = inp
 
-    
+
     def add_excitatory(self, inputs, forced=False):
         assert len(inputs) == self.size
         for u, net_raw in zip(self.units, inputs):
@@ -86,7 +86,7 @@ class LayerSpec:
 
         # time step constants:
         self.fb_dt = 1/1.4          # Integration constant for feed back inhibition
-        
+
         # weighting constants
         self.fb = 1.0                 # feedback scaling of inhibition
         self.ff = 1.0                 # feedforward scaling of inhibition
@@ -104,14 +104,14 @@ class LayerSpec:
 
         # Calculate feed forward inhibition
         netin = [u.g_e for u in layer.units]
-        layer.ffi = self.ff * max(0, statistics.mean(netin) - self.ff0) 
-        
+        layer.ffi = self.ff * max(0, statistics.mean(netin) - self.ff0)
+
         # Calculate feed back inhibition
-        layer.fbi += self.fb_dt * (self.fb * statistics.mean(layer.activities) - layer.fbi) 
-        
+        layer.fbi += self.fb_dt * (self.fb * statistics.mean(layer.activities) - layer.fbi)
+
         return self.gi * (layer.ffi + layer.fbi)
 
-    
+
     def cycle(self, layer):
         """Calculate net inputs for this layer"""
         for connection in layer.connections:
@@ -122,7 +122,6 @@ class LayerSpec:
 
         """Update the state of the layer"""
         layer.gc_i = self._inhibition(layer)
-        
+
         for u in layer.units:
             u.cycle(g_i=layer.gc_i)
-        

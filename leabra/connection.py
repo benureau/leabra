@@ -9,7 +9,7 @@ class Link:
         self.pre  = pre_unit
         self.post = post_unit
         self.wt   = w0
-        self.fwt  = self.wt 
+        self.fwt  = self.wt
         self.dwt  = 0.0
 
 
@@ -35,7 +35,7 @@ class Connection:
 
         post_layer.connections.append(self)
 
-        
+
 
 
     @property
@@ -95,7 +95,7 @@ class ConnectionSpec:
         for link in connection.links:
             scaled_act = self.st * link.wt * link.pre.act
             link.post.add_excitatory(scaled_act, forced=self.force)
-        
+
 
     def _full_projection(self, connection):
         # creating unit-to-unit links
@@ -103,7 +103,7 @@ class ConnectionSpec:
         for pre_u in connection.pre.units:
             for post_u in connection.post.units:
                 connection.links.append(Link(pre_u, post_u, self.w0))
-        
+
 
     def _1to1_projection(self, connection):
         # creating unit-to-unit links
@@ -111,7 +111,7 @@ class ConnectionSpec:
         assert connection.pre.size == connection.post.size
         for pre_u, post_u in zip(connection.pre.units, connection.post.units):
             connection.links.append(Link(pre_u, post_u, self.w0))
-        
+
 
     def projection_init(self, connection):
         if self.proj == 'full':
@@ -119,7 +119,7 @@ class ConnectionSpec:
         if self.proj == '1to1':
             self._1to1_projection(connection)
 
-    
+
     def learn(self, connection):
         if self.lrule is not None:
             getattr(self, self.lrule + '_lrule')(connection)
@@ -134,28 +134,23 @@ class ConnectionSpec:
             print(link.dwt)
             link.fwt += link.dwt
             link.wt = self.sig(link.fwt)
-            
+
             link.dwt = 0.0
 
-    def leabra_lrule(self, connection): 
+    def leabra_lrule(self, connection):
         """Leabra learning rule.
-    
+
         """
 
         for link in connection.links:
             srs = link.post.avg_s_eff*link.pre.avg_s_eff
             srm = link.post.avg_m*link.pre.avg_m
-            
+
             link.dwt += self.lrate * ( self.m_lrn * self.xcal(srs,srm) + link.post.avg_l_lrn * self.xcal(srs, link.post.avg_l))
             
-
-
-        
-        
-
     def delta_lrule(self, connection):
         """Delta learning rule.
-    
+
         Presumably at the end of the plus phase, compares difference between the
         current activity of the post-unit (allegedly representing the target
         activity) with its activity at the end of the minus phase (stored in
@@ -164,7 +159,7 @@ class ConnectionSpec:
         """
         for link in conneciton.links:
             dwt += self.lrate * (link.post.act - link.post.act_m) * link.pre.act  # eq. A8
-            link.wt += dwt 
+            link.wt += dwt
 
     def xcal_lrule(self):
         """XCAL learning rule"""
@@ -177,6 +172,6 @@ class ConnectionSpec:
             return (x - th)
         else:
             return (-x * ((1-self.d_rev)/self.d_rev))
-    
+
     def sig(self,x):
         return 1 / (1 + (self.sig_off*(1-x)/x) ** self.sig_gain)

@@ -12,9 +12,9 @@ This is a work in progress.
 
 - [x] Unit class
 - [x] Unit example
-- [ ] Quantitative Unit equivalence with emergent  
-- [ ] Layer class
-- [ ] Layer example
+- [x] Quantitative Unit equivalence with emergent  
+- [x] Layer class
+- [x] Layer example
 - [ ] Connection & Projection classes
 - [ ] Connection & Projection example
 - [ ] XCAL learning rule
