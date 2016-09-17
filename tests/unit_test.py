@@ -33,7 +33,7 @@ class UnitTestsAPI(unittest.TestCase):
     def test_forced_act(self):
         """Test that forcing activity behaves as expected"""
         u = leabra.Unit()
-        u.add_excitatory(0.5, forced=True)
+        u.force_activity(0.5)
         u.calculate_net_in()
         u.cycle()
         self.assertEqual(u.act, 0.5)
@@ -44,7 +44,7 @@ class UnitTestsAPI(unittest.TestCase):
             u.cycle()
             self.assertEqual(u.act, 0.5)
 
-        u.add_excitatory(0.5, forced=False)
+        u.add_excitatory(0.5)
         u.calculate_net_in()
         u.cycle()
         self.assertFalse(u.act == 0.5)
@@ -53,7 +53,7 @@ class UnitTestsAPI(unittest.TestCase):
 class UnitTestsBehavior(unittest.TestCase):
     """Check that the Unit behaves as they should.
 
-    The checks are concerned with consistency with the equation that define the
+    The checks are concerned with consistency with the equations that define the
     unit's behavior. These test should pass on the emergent implementation as
     well.
     """
@@ -101,7 +101,7 @@ class UnitTestsBehavior(unittest.TestCase):
         u = leabra.Unit()
 
         for t in range(10):
-            u.add_excitatory(1.0, forced=True)
+            u.force_activity(1.0)
             u.calculate_net_in()
             u.cycle()
 

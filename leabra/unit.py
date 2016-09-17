@@ -25,27 +25,27 @@ class Unit:
 
         self.ex_inputs  = []    # excitatory inputs for the next cycle
         self.forced     = False # Is activity directly set?
-        self.forced_act = None  # if forced, act == forced_act
 
-        self.g_e     = 0
-        self.I_net   = 0
-        self.I_net_r = self.I_net
-        self.v_m     = 0.4
-        self.v_m_eq  = self.v_m
-        self.act     = 0         # current activity
-        self.act_m   = self.act  # activity at the end of the minus phase
-        self.act_nd  = self.act  # non-depressed activity # FIXME: not implemented yet
+        self.g_e     = 0           # excitatory conductance
+        self.I_net   = 0           # net current
+        self.I_net_r = self.I_net  # net current, equilibrium version (for v_m_eq)
+        self.v_m     = 0.4         # membrane potential
+        self.v_m_eq  = self.v_m    # equilibrium membrane potential
+                                   # (not reseted after a spike)
+        self.act     = 0           # current activity
+        self.act_m   = self.act    # activity at the end of the minus phase
+        self.act_nd  = self.act    # non-depressed activity # FIXME: not implemented yet
 
         self.adapt   = 0     # adaptation current: causes the rate of activation
                               # to decrease over time
 
-        # averages
+        # averages of the activity
         self.avg_ss    = 0.15 # FIXME: why 0.15?
-        self.avg_s     = 0.15
-        self.avg_m     = 0.15
-        self.avg_l     = 0.15 # FIXME: may be different, investigate `avg_l.init`
-        self.avg_l_lrn = 1.0
-        self.avg_s_eff = 0.0
+        self.avg_s     = 0.15 # short-term average
+        self.avg_m     = 0.15 # medium-term average
+        self.avg_l     = 0.15 # long-term average #FIXME: may be different, investigate `avg_l.init`
+        self.avg_l_lrn = 1.0  # FIXME: why 1.0?
+        self.avg_s_eff = 0.0  # linear mixing of avg_s and avg_m
 
         self.logs  = {name: [] for name in log_names}
 
@@ -57,34 +57,32 @@ class Unit:
     def calculate_net_in(self):
         return self.spec.calculate_net_in(self)
 
-
     @property
     def net(self):
         """Excitatory conductance."""
         return self.spec.g_bar_e * self.g_e
 
+    def force_activity(self, act):
+        """Force the activity of a unit.
 
-    def add_excitatory(self, inp_act, forced=False):
-        """Add an input for the next cycle.
-
-        If the activity is directly set (`forced==True`), then at most one call
-        to add_excitatory should be done per cycle. If no call is made and the
-        last call was forced, then the subsequent cycles continue to force this
-        value on the unit activity.
+        The activity of the unit will remain at that value for subsequent cycles,
+        until `force_activity()` is called with a different values, or until
+        `add_excitatory()` is called, which will resume updating `I_net` and
+        `v_m` and compute `act` based on those.
         """
-        self.forced = forced
-        if self.forced: # the activity is set directly
-            assert len(self.ex_inputs) == 0
-            self.forced_act = inp_act
-        else:
-            self.ex_inputs.append(inp_act)
+        self.forced = True
+        assert len(self.ex_inputs) == 0  # avoiding mistakes
+        self.act = act  # FIXME: should the activity be delayed until the start of the next cycle?
 
+    def add_excitatory(self, inp_act):
+        """Add an input for the next cycle."""
+        self.forced = False
+        self.ex_inputs.append(inp_act)
 
     def update_logs(self):
         """Record current state. Called after each cycle."""
         for name in self.logs.keys():
             self.logs[name].append(getattr(self, name))
-
 
     def show_config(self):
         """Display the value of constants and state variables."""
@@ -234,7 +232,6 @@ class UnitSpec:
         """
 
         if unit.forced:
-            unit.act = unit.forced_act
             self.update_avgs(unit, dt_integ)
             unit.update_logs()
             return # done!
@@ -283,22 +280,6 @@ class UnitSpec:
         self.update_avgs(unit, dt_integ)
         unit.update_logs()
 
-    def update_avgs(self, unit, dt_integ):
-        """Update all averages except long-term, at the end of every cycle."""
-        unit.avg_ss += dt_integ * self.avg_ss_dt * (unit.act_nd - unit.avg_ss)
-        unit.avg_s  += dt_integ * self.avg_s_dt  * (unit.avg_ss - unit.avg_s )
-        unit.avg_m  += dt_integ * self.avg_m_dt  * (unit.avg_s  - unit.avg_m )
-        unit.avg_s_eff = self.avg_m_in_s * unit.avg_m + (1 - self.avg_m_in_s) * unit.avg_s
-
-    def update_avg_l(self, dt_integ):
-        """Update the long-term average.
-
-        Called at the end of every trial (*not every cycle*).
-        """
-        if unit_avg_m > 0.2: # FIXME: 0.2 is a magic number here
-            unit.avg_l += self.avg_l_dt * (self.avg_l_max - unit.avg_m)
-        else:
-            unit.avg_l += self.avg_l_dt * (self.avg_l_min - unit.avg_m)
 
     def integrate_I_net(self, unit, g_i, dt_integ, ratecoded=True, steps=1):
         """Integrate and returns I_net for the provided v_m
@@ -321,3 +302,22 @@ class UnitSpec:
             v_m_eff += dt_integ/steps * self.dt_vm * I_net
 
         return I_net
+
+
+    def update_avgs(self, unit, dt_integ):
+        """Update all averages except long-term, at the end of every cycle."""
+        unit.avg_ss += dt_integ * self.avg_ss_dt * (unit.act_nd - unit.avg_ss)
+        unit.avg_s  += dt_integ * self.avg_s_dt  * (unit.avg_ss - unit.avg_s )
+        unit.avg_m  += dt_integ * self.avg_m_dt  * (unit.avg_s  - unit.avg_m )
+        unit.avg_s_eff = self.avg_m_in_s * unit.avg_m + (1 - self.avg_m_in_s) * unit.avg_s
+
+
+    def update_avg_l(self, dt_integ):
+        """Update the long-term average.
+
+        Called at the end of every trial (*not every cycle*).
+        """
+        if unit_avg_m > 0.2: # FIXME: 0.2 is a magic number here
+            unit.avg_l += self.avg_l_dt * (self.avg_l_max - unit.avg_m)
+        else:
+            unit.avg_l += self.avg_l_dt * (self.avg_l_min - unit.avg_m)
