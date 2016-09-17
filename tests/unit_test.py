@@ -50,6 +50,24 @@ class UnitTestsAPI(unittest.TestCase):
         self.assertFalse(u.act == 0.5)
 
 
+    def test_avg_l(self):
+        """Test that the long-term average are correctly updated."""
+        u = leabra.Unit()
+
+        for _ in range(20):
+            u.add_excitatory(1.0)
+            u.calculate_net_in()
+            u.cycle()
+
+        self.assertEqual(u.avg_l, 0.15)
+        u.spec.update_avg_l(u, 1.0)
+        self.assertTrue(np.allclose(0.20, u.avg_l, rtol=0.1, atol=0.1))
+
+        for _ in range(100):
+            u.spec.update_avg_l(u, 1.0)
+        self.assertTrue(np.allclose(1.50, u.spec.avg_l_max, rtol=0.1, atol=0.1))
+
+
 class UnitTestsBehavior(unittest.TestCase):
     """Check that the Unit behaves as they should.
 

@@ -312,12 +312,12 @@ class UnitSpec:
         unit.avg_s_eff = self.avg_m_in_s * unit.avg_m + (1 - self.avg_m_in_s) * unit.avg_s
 
 
-    def update_avg_l(self, dt_integ):
+    def update_avg_l(self, unit, dt_integ):
         """Update the long-term average.
 
         Called at the end of every trial (*not every cycle*).
         """
-        if unit_avg_m > 0.2: # FIXME: 0.2 is a magic number here
-            unit.avg_l += self.avg_l_dt * (self.avg_l_max - unit.avg_m)
+        if unit.avg_m > 0.2: # FIXME: 0.2 is a magic number here
+            unit.avg_l += self.avg_l_dt * (self.avg_l_max - unit.avg_l)
         else:
-            unit.avg_l += self.avg_l_dt * (self.avg_l_min - unit.avg_m)
+            unit.avg_l += self.avg_l_dt * (self.avg_l_min - unit.avg_l)
