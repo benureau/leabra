@@ -9,10 +9,43 @@ import dotdot  # pylint: disable=unused-import
 import leabra
 
 
+
+class LayerTestAPI(unittest.TestCase):
+
+
+    def test_layer_inputs(self):
+        """Check that adding inputs works as expected."""
+        layer = leabra.Layer(3)
+        layer.spec.g_i = 0.0  # no inhibition
+
+        for _ in range(20):
+            layer.add_excitatory([0.0, 0.5, 1.0])
+            layer.cycle()
+
+        for _ in range(100):
+            layer.add_excitatory([0.0, 0.5, 1.0])
+            layer.cycle()
+            acts = layer.activities
+            self.assertEqual(acts[0], 0.0)
+            self.assertTrue(np.allclose(0.5, acts[1], rtol=1.0, atol=1e-01))
+            self.assertTrue(np.allclose(0.9, acts[1], rtol=1.0, atol=1e-01))
+
+
+    def test_layer_forced(self):
+        """Check forcing of layer's activities."""
+        layer = leabra.Layer(5)
+        layer.force_activity([0.0, 0.25, 0.50, 0.75, 1.0])
+
+        for _ in range(100):
+            layer.cycle()
+            self.assertEqual(layer.activities, [0.0, 0.25, 0.50, 0.75, 1.0])
+
+
+
 class LayerTestsBehavior(unittest.TestCase):
     """Check that the Layer behaves as they should.
 
-    The checks are concerned with consistency with the equation that define the
+    The checks are concerned with consistency with the equations that define the
     layer's behavior. These test should pass on the emergent implementation as
     well.
     """

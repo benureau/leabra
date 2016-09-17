@@ -44,17 +44,17 @@ class Layer:
         return [u.I_net for u in self.units]
 
 
-    def set_activities(self, inputs):
-        """Set the units's activities equal to the inputs"""
-        assert len(inputs) == self.size
-        for u, inp in zip(self.units, inputs):
-            u.act = inp
+    def force_activity(self, activities):
+        """Set the units's activities equal to the inputs."""
+        assert len(activities) == self.size
+        for u, act in zip(self.units, activities):
+            u.force_activity(act)
 
-
-    def add_excitatory(self, inputs, forced=False):
+    def add_excitatory(self, inputs):
+        """Add excitatory inputs to the layer's units."""
         assert len(inputs) == self.size
         for u, net_raw in zip(self.units, inputs):
-            u.add_excitatory(net_raw, forced=forced)
+            u.add_excitatory(net_raw)
 
     def cycle(self):
         self.spec.cycle(self)
@@ -62,7 +62,7 @@ class Layer:
     def show_config(self):
         """Display the value of constants and state variables."""
         print('Parameters:')
-        for name in ['fb_dt', 'ff0', 'ff', 'fb', 'gi']:
+        for name in ['fb_dt', 'ff0', 'ff', 'fb', 'g_i']:
             print('   {}: {:.2f}'.format(name, getattr(self.spec, name)))
         print('State:')
         for name in ['gc_i', 'fbi', 'ffi']:
@@ -78,12 +78,12 @@ class LayerSpec:
         """Initialize a LayerSpec"""
 
         # time step constants:
-        self.fb_dt = 1/1.4          # Integration constant for feed back inhibition
+        self.fb_dt = 1/1.4  # Integration constant for feed back inhibition
 
         # weighting constants
-        self.fb = 1.0                 # feedback scaling of inhibition
-        self.ff = 1.0                 # feedforward scaling of inhibition
-        self.gi = 1.8
+        self.fb    = 1.0    # feedback scaling of inhibition
+        self.ff    = 1.0    # feedforward scaling of inhibition
+        self.g_i   = 1.8    # inhibition multiplier
 
         # thresholds:
         self.ff0 = 0.1
@@ -103,7 +103,7 @@ class LayerSpec:
         # Calculate feed back inhibition
         layer.fbi += self.fb_dt * (self.fb * statistics.mean(layer.activities) - layer.fbi)
 
-        return self.gi * (layer.ffi + layer.fbi)
+        return self.g_i * (layer.ffi + layer.fbi)
 
 
     def cycle(self, layer):
