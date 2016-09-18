@@ -60,11 +60,11 @@ class UnitTestsAPI(unittest.TestCase):
             u.cycle()
 
         self.assertEqual(u.avg_l, 0.15)
-        u.spec.update_avg_l(u, 1.0)
+        u.spec.update_avg_l(u)
         self.assertTrue(np.allclose(0.20, u.avg_l, rtol=0.1, atol=0.1))
 
         for _ in range(100):
-            u.spec.update_avg_l(u, 1.0)
+            u.spec.update_avg_l(u)
         self.assertTrue(np.allclose(1.50, u.spec.avg_l_max, rtol=0.1, atol=0.1))
 
 

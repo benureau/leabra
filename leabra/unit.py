@@ -292,7 +292,6 @@ class UnitSpec:
         gc_i = self.g_bar_i * g_i
         gc_l = self.g_bar_l * self.g_l
         v_m_eff = unit.v_m_eq if ratecoded else unit.v_m
-        adapt   = 0.0         if ratecoded else unit.adapt
 
         for _ in range(steps):
             I_net = (  gc_e * (self.e_rev_e - v_m_eff)
@@ -312,7 +311,7 @@ class UnitSpec:
         unit.avg_s_eff = self.avg_m_in_s * unit.avg_m + (1 - self.avg_m_in_s) * unit.avg_s
 
 
-    def update_avg_l(self, unit, dt_integ):
+    def update_avg_l(self, unit):
         """Update the long-term average.
 
         Called at the end of every trial (*not every cycle*).

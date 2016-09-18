@@ -107,15 +107,15 @@ class LayerSpec:
 
 
     def cycle(self, layer):
-        """Calculate net inputs for this layer"""
+        """Cycle the layer, and all the units in it."""
+        # calculate net inputs for this layer
         for connection in layer.connections:
             connection.cycle()
 
         for u in layer.units:
             u.calculate_net_in()
 
-        """Update the state of the layer"""
+        # update the state of the layer
         layer.gc_i = self._inhibition(layer)
-
         for u in layer.units:
             u.cycle(g_i=layer.gc_i)

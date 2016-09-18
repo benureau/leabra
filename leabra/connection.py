@@ -1,4 +1,3 @@
-from .unit import Unit
 import numpy as np
 
 
@@ -28,15 +27,10 @@ class Connection:
         self.spec  = spec
         if self.spec is None:
             self.spec = ConnectionSpec()
-        assert (self.spec.lrule is None or
-                self.spec.lrule.lower() in self.spec.legal_lrule)
 
         self.spec.projection_init(self)
 
         post_layer.connections.append(self)
-
-
-
 
     @property
     def weights(self):
@@ -51,19 +45,16 @@ class Connection:
                     W[i, j] = next(link_it).wt
             return W
 
-
-
-
-
     def learn(self):
         self.spec.learn(self)
 
     def cycle(self):
         self.spec.cycle(self)
 
+
+
 class ConnectionSpec:
 
-    legal_lrule = None, 'delta', 'xcal', 'leabra'  # available values for self.lrule
     legal_proj  = 'full', '1to1'        #              ... for self.proj
 
     def __init__(self, **kwargs):
@@ -123,7 +114,7 @@ class ConnectionSpec:
 
     def learn(self, connection):
         if self.lrule is not None:
-            getattr(self, self.lrule + '_lrule')(connection)
+            self.learning_rule(connection)
             self.apply_dwt(connection)
         for link in connection.links:
             link.wt = max(0.0, min(1.0, link.wt)) # clipping weights after change
@@ -131,40 +122,23 @@ class ConnectionSpec:
     def apply_dwt(self,connection):
 
         for link in connection.links:
-            link.dwt *= (1 - link.fwt) if (link.dwt > 0) else  link.fwt
+            link.dwt *= (1 - link.fwt) if (link.dwt > 0) else link.fwt
             print(link.dwt)
             link.fwt += link.dwt
             link.wt = self.sig(link.fwt)
 
             link.dwt = 0.0
 
-    def leabra_lrule(self, connection):
-        """Leabra learning rule.
-
-        """
+    def learning_rule(self, connection):
+        """Leabra learning rule."""
 
         for link in connection.links:
-            srs = link.post.avg_s_eff*link.pre.avg_s_eff
-            srm = link.post.avg_m*link.pre.avg_m
+            srs = link.post.avg_s_eff * link.pre.avg_s_eff
+            srm = link.post.avg_m * link.pre.avg_m
+            print(srs, srm)
 
-            link.dwt += self.lrate * ( self.m_lrn * self.xcal(srs,srm) + link.post.avg_l_lrn * self.xcal(srs, link.post.avg_l))
-
-    def delta_lrule(self, connection):
-        """Delta learning rule.
-
-        Presumably at the end of the plus phase, compares difference between the
-        current activity of the post-unit (allegedly representing the target
-        activity) with its activity at the end of the minus phase (stored in
-        `act_m`). The weights are then modified in proportion to this difference,
-        the current pre-unit activity (credit attribution) and the learning rate.
-        """
-        for link in conneciton.links:
-            dwt += self.lrate * (link.post.act - link.post.act_m) * link.pre.act  # eq. A8
-            link.wt += dwt
-
-    def xcal_lrule(self):
-        """XCAL learning rule"""
-        raise NotImplementedError
+            link.dwt += (  self.lrate * ( self.m_lrn * self.xcal(srs, srm)
+                         + link.post.avg_l_lrn * self.xcal(srs, link.post.avg_l)))
 
     def xcal(self, x, th):
         if (x < self.d_thr):
@@ -172,7 +146,7 @@ class ConnectionSpec:
         elif (x > th * self.d_rev):
             return (x - th)
         else:
-            return (-x * ((1-self.d_rev)/self.d_rev))
+            return (-x * ((1 - self.d_rev)/self.d_rev))
 
     def sig(self,x):
-        return 1 / (1 + (self.sig_off*(1-x)/x) ** self.sig_gain)
+        return 1 / (1 + (self.sig_off*(1 - x) / x) ** self.sig_gain)
