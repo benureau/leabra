@@ -28,6 +28,11 @@ class Layer:
 
         self.connections = []
 
+    def reset(self):
+        """Reset all the units in the layer"""
+        for u in self.units:
+            u.reset()
+
     @property
     def activities(self):
         """Return the matrix of the units's activities"""

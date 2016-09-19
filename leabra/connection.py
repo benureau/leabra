@@ -60,7 +60,7 @@ class ConnectionSpec:
     def __init__(self, **kwargs):
         """Connnection parameters"""
         self.st       = 1.0     # connection strength
-        self.force    = False   # activity are set directly in the post_layer
+        # self.force    = False   # activity are set directly in the post_layer
         self.inhib    = False   # if True, inhibitory connection
         self.w0       = 1.0     # intial weights
         self.proj     = 'full'  # connection pattern between units.
@@ -86,7 +86,7 @@ class ConnectionSpec:
         """Transmit activity."""
         for link in connection.links:
             scaled_act = self.st * link.wt * link.pre.act
-            link.post.add_excitatory(scaled_act, forced=self.force)
+            link.post.add_excitatory(scaled_act)
 
 
     def _full_projection(self, connection):

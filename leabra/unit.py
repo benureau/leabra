@@ -23,6 +23,21 @@ class Unit:
         if self.spec is None:
             self.spec = UnitSpec()
 
+        self.log_names = ('net', 'I_net', 'v_m', 'act', 'v_m_eq', 'adapt')
+        self.logs  = {name: [] for name in self.log_names}
+
+        self.reset()
+
+        # averages of the activity
+        self.avg_ss    = 0.15 # FIXME: why 0.15?
+        self.avg_s     = 0.15 # short-term average
+        self.avg_m     = 0.15 # medium-term average
+        self.avg_l     = 0.15 # long-term average #FIXME: may be different, investigate `avg_l.init`
+        self.avg_l_lrn = 1.0  # FIXME: why 1.0?
+        self.avg_s_eff = 0.0  # linear mixing of avg_s and avg_m
+
+    def reset(self):
+        """Reset the Unit state. Called at creation, and at every trial."""
         self.ex_inputs  = []    # excitatory inputs for the next cycle
         self.forced     = False # Is activity directly set?
 
@@ -38,17 +53,6 @@ class Unit:
 
         self.adapt   = 0     # adaptation current: causes the rate of activation
                               # to decrease over time
-
-        # averages of the activity
-        self.avg_ss    = 0.15 # FIXME: why 0.15?
-        self.avg_s     = 0.15 # short-term average
-        self.avg_m     = 0.15 # medium-term average
-        self.avg_l     = 0.15 # long-term average #FIXME: may be different, investigate `avg_l.init`
-        self.avg_l_lrn = 1.0  # FIXME: why 1.0?
-        self.avg_s_eff = 0.0  # linear mixing of avg_s and avg_m
-
-        self.logs  = {name: [] for name in log_names}
-
 
     def cycle(self, g_i=0.0, dt_integ=1):
         """Cycle the unit"""
