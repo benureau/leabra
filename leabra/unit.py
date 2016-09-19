@@ -23,7 +23,7 @@ class Unit:
         if self.spec is None:
             self.spec = UnitSpec()
 
-        self.log_names = ('net', 'I_net', 'v_m', 'act', 'v_m_eq', 'adapt')
+        self.log_names = log_names
         self.logs  = {name: [] for name in self.log_names}
 
         self.reset()
