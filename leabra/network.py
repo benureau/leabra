@@ -115,3 +115,6 @@ class Network:
         """End of the plus phase. Connections change weights."""
         for conn in self.connections:
             conn.learn()
+        for layer in self.layers:
+            for unit in layer.units:
+                unit.update_avg_l()
