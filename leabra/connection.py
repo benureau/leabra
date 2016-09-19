@@ -129,7 +129,6 @@ class ConnectionSpec:
         if self.learn is not None:
             self.learning_rule(connection)
             self.apply_dwt(connection)
-        print(connection.weights)
         for link in connection.links:
             link.wt = max(0.0, min(1.0, link.wt)) # clipping weights after change
 
@@ -150,7 +149,8 @@ class ConnectionSpec:
         for link in connection.links:
             srs = link.post.avg_s_eff * link.pre.avg_s_eff
             srm = link.post.avg_m * link.pre.avg_m
-            print(srs, srm)
+            print('avg_s_eff', link.post.avg_s_eff, link.pre.avg_s_eff)
+            print('srs', srs)
 
             link.dwt += (  self.lrate * ( self.m_lrn * self.xcal(srs, srm)
                          + link.post.avg_l_lrn * self.xcal(srs, link.post.avg_l)))
