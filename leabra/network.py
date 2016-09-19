@@ -4,7 +4,7 @@ class NetworkSpec:
 
     def __init__(self, **kwargs):
         # time step constants
-        self.quarter_size = 15  # number of cycles in a settle period
+        self.quarter_size = 25  # number of cycles in a settle period
 
         for key, value in kwargs.items():
             assert hasattr(self, key) # making sure the parameter exists.

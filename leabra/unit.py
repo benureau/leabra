@@ -76,7 +76,8 @@ class Unit:
         """
         self.forced = True
         assert len(self.ex_inputs) == 0  # avoiding mistakes
-        self.act = act  # FIXME: should the activity be delayed until the start of the next cycle?
+        self.act    = act  # FIXME: should the activity be delayed until the start of the next cycle?
+        self.act_nd = act
 
     def add_excitatory(self, inp_act):
         """Add an input for the next cycle."""
@@ -220,7 +221,7 @@ class UnitSpec:
             return # done!
 
         # computing net_raw, the total, instantaneous, excitatory input for the neuron
-        net_raw = sum(unit.ex_inputs) # / max(1, len(self.ex_inputs))
+        net_raw = sum(unit.ex_inputs) / max(1, len(unit.ex_inputs))
         unit.ex_inputs = []
 
         # updating net

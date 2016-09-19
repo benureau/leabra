@@ -43,12 +43,6 @@ class Layer:
         """Return the matrix of the units's net exitatory input"""
         return [u.g_e for u in self.units]
 
-    @property
-    def I_Net(self):
-        """Return the matrix of the units's net exitatory input"""
-        return [u.I_net for u in self.units]
-
-
     def force_activity(self, activities):
         """Set the units's activities equal to the inputs."""
         assert len(activities) == self.size
@@ -114,9 +108,6 @@ class LayerSpec:
     def cycle(self, layer):
         """Cycle the layer, and all the units in it."""
         # calculate net inputs for this layer
-        for connection in layer.connections:
-            connection.cycle()
-
         for u in layer.units:
             u.calculate_net_in()
 
