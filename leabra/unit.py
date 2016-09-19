@@ -32,7 +32,7 @@ class Unit:
         self.avg_ss    = 0.15 # FIXME: why 0.15?
         self.avg_s     = 0.15 # short-term average
         self.avg_m     = 0.15 # medium-term average
-        self.avg_l     = 0.15 # long-term average #FIXME: may be different, investigate `avg_l.init`
+        self.avg_l     = self.spec.avg_l_init
         self.avg_l_lrn = 1.0  # FIXME: why 1.0?
         self.avg_s_eff = 0.0  # linear mixing of avg_s and avg_m
 
@@ -83,6 +83,9 @@ class Unit:
         """Add an input for the next cycle."""
         self.forced = False
         self.ex_inputs.append(inp_act)
+
+    def update_avg_l(self):
+        return self.spec.update_avg_l(self)
 
     def update_logs(self):
         """Record current state. Called after each cycle."""
@@ -148,6 +151,7 @@ class UnitSpec:
         self.avg_s_dt   = 0.5
         self.avg_m_dt   = 0.1
         self.avg_l_dt   = 0.1 # computed once every trial
+        self.avg_l_init = 0.15
         self.avg_l_min  = 0.1
         self.avg_l_max  = 1.5
         self.avg_m_in_s = 0.1
