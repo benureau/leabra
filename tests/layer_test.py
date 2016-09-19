@@ -55,7 +55,7 @@ class LayerTestsBehavior(unittest.TestCase):
         emergent_data = data.parse_unit('layer_1.txt')
 
         unit_spec0 = leabra.UnitSpec(adapt_on=True, noisy_act=True)
-        layer_spec0 = leabra.LayerSpec(gi=0.4, ff=1.0,fb=0.5)
+        layer_spec0 = leabra.LayerSpec(g_i=0.4, ff=1.0,fb=0.5)
         connection_spec0 = leabra.ConnectionSpec(proj='1to1')
 
         src_layer = leabra.Layer(10,spec=layer_spec0, unit_spec=unit_spec0)
@@ -67,9 +67,9 @@ class LayerTestsBehavior(unittest.TestCase):
 
         for i in range(200):
             if ((i >= 10) and (i < 160)):
-                src_layer.add_excitatory(input_pattern, forced=True)
+                src_layer.force_activity(input_pattern)
             else:
-                src_layer.add_excitatory(10 * [0.0], forced=True)
+                src_layer.force_activity(10 * [0.0])
             src_layer.cycle()
             dst_layer.cycle()
 
