@@ -15,7 +15,8 @@ def _notebook_run(filepath):
         os.makedirs(outdir)
 
     outfilename = os.path.join(outdir, '{}.ipynb'.format(name))
-    args = ['jupyter', 'nbconvert', '--to', 'notebook', '--execute',
+    args = ['jupyter', 'nbconvert', '--log-level', 'WARN',
+            '--to', 'notebook', '--execute',
             '--ExecutePreprocessor.timeout=120',
             '--output', outfilename, filepath]
     subprocess.check_call(args)
