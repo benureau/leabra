@@ -1,6 +1,6 @@
 numpy
 scipy
-bokeh
+bokeh>=0.12.2
 ipywidgets>=5.0
 jupyter
 nose

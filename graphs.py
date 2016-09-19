@@ -142,11 +142,11 @@ def unit_activity(data, names=default_names):
 def unit_activity_interactive(data, names=default_names, figdata=None):
     if figdata is None:
         fig, lines = _unit_activity_aux(data)
-        bkp.show(fig)
-        return fig, lines
+        handle = bkp.show(fig, notebook_handle=True)
+        return handle, fig, lines
     else:
-        fig, lines = figdata
+        handle, fig, lines = figdata
         names = ['net', 'v_m', 'I_net', 'act']
         for name, line in zip(names, lines):
             line['y'] = data[name]
-        bokeh.io.push_notebook()
+        bokeh.io.push_notebook(handle=handle)
