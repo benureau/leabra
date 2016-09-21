@@ -7,11 +7,11 @@ import numpy as np
 class Link:
     """A link between two units. Simple, non active class."""
 
-    def __init__(self, pre_unit, post_unit, w0):
+    def __init__(self, pre_unit, post_unit, w0, fw0):
         self.pre  = pre_unit
         self.post = post_unit
         self.wt   = w0
-        self.fwt  = self.wt
+        self.fwt  = fw0
         self.dwt  = 0.0
 
 
@@ -39,7 +39,7 @@ class Connection:
     def weights(self):
         """Return a matrix of the links weights"""
         if self.spec.proj.lower() == '1to1':
-            return np.array([[link.w for link in self.links]])
+            return np.array([[link.wt for link in self.links]])
         else:  # proj == 'full'
             W = np.zeros((len(self.pre.units), len(self.post.units)))  # weight matrix
             link_it = iter(self.links)  # link iterator
@@ -92,8 +92,9 @@ class ConnectionSpec:
     def cycle(self, connection):
         """Transmit activity."""
         for link in connection.links:
-            scaled_act = self.st * link.wt * link.pre.act
-            link.post.add_excitatory(scaled_act)
+            if not link.post.forced:
+                scaled_act = self.st * link.wt * link.pre.act
+                link.post.add_excitatory(scaled_act)
 
     def _rnd_wt(self):
         """Return a random weight, according to the specified distribution"""
@@ -107,7 +108,9 @@ class ConnectionSpec:
         connection.links = []
         for pre_u in connection.pre.units:
             for post_u in connection.post.units:
-                connection.links.append(Link(pre_u, post_u, self._rnd_wt()))
+                w0 = self._rnd_wt()
+                fw0 = self.sig_inv(w0)
+                connection.links.append(Link(pre_u, post_u, w0, fw0))
 
 
     def _1to1_projection(self, connection):
@@ -115,7 +118,9 @@ class ConnectionSpec:
         connection.links = []
         assert connection.pre.size == connection.post.size
         for pre_u, post_u in zip(connection.pre.units, connection.post.units):
-            connection.links.append(Link(pre_u, post_u, self._rnd_wt()))
+            w0 = self._rnd_wt()
+            fw0 = self.sig_inv(w0)
+            connection.links.append(Link(pre_u, post_u, w0, fw0))
 
 
     def projection_init(self, connection):
@@ -138,7 +143,7 @@ class ConnectionSpec:
             link.dwt *= (1 - link.fwt) if (link.dwt > 0) else link.fwt
             print('dwt', link.dwt)
             link.fwt += link.dwt
-            print('fwt', link.fwt, self.sig(link.fwt))
+            print('fwt', link.fwt, 'wt', self.sig(link.fwt))
             link.wt = self.sig(link.fwt)
 
             link.dwt = 0.0
@@ -149,9 +154,9 @@ class ConnectionSpec:
         for link in connection.links:
             srs = link.post.avg_s_eff * link.pre.avg_s_eff
             srm = link.post.avg_m * link.pre.avg_m
-            print('avg_s_eff', link.post.avg_s_eff, link.pre.avg_s_eff)
-            print('srs', srs)
-
+            print('srs = {:.6f} [avg_s_eff {:.6f} {:.6f}'.format(srs, link.pre.avg_s_eff, link.post.avg_s_eff))
+            print('srm = {:.6f} [avg_m     {:.6f} {:.6f}'.format(srm, link.pre.avg_m, link.post.avg_m))
+            print('diff = {:.8f}'.format(srm-srs))
             link.dwt += (  self.lrate * ( self.m_lrn * self.xcal(srs, srm)
                          + link.post.avg_l_lrn * self.xcal(srs, link.post.avg_l)))
 
@@ -165,3 +170,6 @@ class ConnectionSpec:
 
     def sig(self, w):
         return 1 / (1 + (self.sig_off * (1 - w) / w) ** self.sig_gain)
+
+    def sig_inv(self, w):
+        return 1 / (1 + ((1 - w) / w) ** (1 / self.sig_gain) / self.sig_off)
