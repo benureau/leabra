@@ -56,12 +56,12 @@ class LayerTestsBehavior(unittest.TestCase):
 
         unit_spec0 = leabra.UnitSpec(adapt_on=True, noisy_act=True)
         layer_spec0 = leabra.LayerSpec(g_i=0.4, ff=1.0,fb=0.5)
-        connection_spec0 = leabra.ConnectionSpec(proj='1to1')
+        connection_spec0 = leabra.ConnectionSpec(proj='1to1', rnd_mean=1.0, rnd_var=0.0)
 
-        src_layer = leabra.Layer(10,spec=layer_spec0, unit_spec=unit_spec0)
-        dst_layer = leabra.Layer(10,spec=layer_spec0, unit_spec= unit_spec0)
+        src_layer = leabra.Layer(10, spec=layer_spec0, unit_spec=unit_spec0)
+        dst_layer = leabra.Layer(10, spec=layer_spec0, unit_spec= unit_spec0)
 
-        connection0 = leabra.Connection(src_layer,dst_layer, spec=connection_spec0)
+        connection0 = leabra.Connection(src_layer, dst_layer, spec=connection_spec0)
 
         input_pattern = 5 * [1.0, 0.0]
 
@@ -71,14 +71,16 @@ class LayerTestsBehavior(unittest.TestCase):
             else:
                 src_layer.force_activity(10 * [0.0])
             src_layer.cycle()
+            connection0.cycle()
             dst_layer.cycle()
+
 
         check = True
         for name in dst_layer.units[0].logs.keys():
             for t, (py, em) in enumerate(zip(dst_layer.units[0].logs[name], emergent_data[name])):
                 if not np.allclose(py, em, rtol=1e-05, atol=1e-07):
-                    print('{}:{} [py] {:.10f} != {:.10f} [emergent] ({}adapt)'.format(
-                            name, t,   py,        em,                 '' if False else 'no '))
+                    print('{}:{} [py] {:.10f} != {:.10f} [emergent]'.format(
+                            name, t,   py,        em))
                     check = False
 
         self.assertTrue(check)
