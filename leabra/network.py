@@ -19,8 +19,10 @@ class Network:
         if self.spec is None:
             self.spec = NetworkSpec()
 
-        self.quarter_nb  = 1 # next quarter to execute (1, 2, 3 or 4)
-        self.cycles      = 0 # how many cycles happened (total)
+        self.cycle_count = 0 # number of cycles finished in the current trial
+        self.quarter_nb  = 1 # current quarter number (1, 2, 3 or 4)
+        self.trial_count = 0 # number of trial finished
+
         self.layers      = list(layers)
         self.connections = list(connections)
 
@@ -60,49 +62,71 @@ class Network:
         """
         self._outputs = act_map
 
+
+    def _pre_cycle(self):
+        """Check if some action needs to be done before starting the cycle.
+
+        Checks if the network is at a special moment (beginning of trial, start
+        or end of phase, etc.), and if some action needs to be done.
+        """
+        if self.cycle_count == self.spec.quarter_size: # a quarter just ended
+            self.quarter_nb += 1
+            if self.quarter_nb == 5: # a trial just ended
+                self.trial_count += 1
+                self.quarter_nb = 1
+            self.cycle_count = 0
+
+        if self.cycle_count == 0: # start of a quarter
+            if self.quarter_nb == 1: # start of trial
+                # reset all layers
+                if self.quarter_nb == 1:
+                    for layer in self.layers:
+                        layer.reset()
+                # force activities for inputs
+                for name, activities in self._inputs.items():
+                    self._get_layer(name).force_activity(activities)
+
+            elif self.quarter_nb == 4: # start of minus phase
+                # force activities for outputs
+                for name, activities in self._outputs.items():
+                    self._get_layer(name).force_activity(activities)
+
+
+    def _post_cycle(self):
+        """Same as _pre_cycle, but after the cycle has executed"""
+        if self.cycle_count == self.spec.quarter_size: # end of a quarter
+            if self.quarter_nb == 3: # end of minus phase
+                self.end_minus_phase()
+
+            if self.quarter_nb == 4: # end of plus phase
+                self.end_plus_phase()
+
+
     def cycle(self):
-        """Execute a quarter"""
+        """Execute a cycle"""
+        self._pre_cycle()
+
         for conn in self.connections:
             conn.cycle()
         for layer in self.layers:
             layer.cycle()
-        self.cycles += 1
+        self.cycle_count += 1
+
+        self._post_cycle()
 
 
     def quarter(self): # FIXME:
         """Execute a quarter"""
-
-        # reset all layers
-        if self.quarter_nb == 1:
-            for layer in self.layers:
-                layer.reset()
-
-        # force activities for inputs and outputs
-        for name, activities in self._inputs.items():
-            self._get_layer(name).force_activity(activities)
-        if self.quarter_nb == 4:
-            for name, activities in self._outputs.items():
-                self._get_layer(name).force_activity(activities)
-
-        # cycle the network
-        for t in range(self.spec.quarter_size):
+        self.cycle()
+        while self.cycle_count < self.spec.quarter_size:
             self.cycle()
-
-        # end of minus or minus phase
-        if self.quarter_nb == 3:
-            self.end_minus_phase()
-
-        if self.quarter_nb == 4:
-            self.end_plus_phase()
-            self.quarter_nb = 0
-
-        self.quarter_nb += 1
 
 
     def trial(self):
         """Execute a trial. Will execute up until the end of the plus phase."""
         self.quarter()
-        while self.quarter_nb != 1:
+        while self.quarter_nb != 4:
+            assert self.cycle_count == self.spec.quarter_size
             self.quarter()
 
     def end_minus_phase(self):
