@@ -46,10 +46,10 @@ class NetworkTestBehavior(unittest.TestCase):
         u_spec = leabra.UnitSpec(act_thr=0.5, act_gain=100, act_sd=0.01,
                                  g_bar_e=1.0, g_bar_i=1.0, g_bar_l=0.1,
                                  e_rev_e=1.0, e_rev_i=0.25, e_rev_l=0.3,
-                                 avg_l_min=0.2, avg_l_init=0.4, avg_l_max=1.5,
+                                 avg_l_min=0.2, avg_l_init=0.155, avg_l_max=1.5,
                                  adapt_on=False)
         input_layer  = leabra.Layer(1, unit_spec=u_spec, name='input_layer')
-        output_spec  = leabra.LayerSpec(g_i=1.5, ff=1.0, fb=0.5, fb_dt=1/1.4, ff0=0.1)
+        output_spec  = leabra.LayerSpec(g_i=0.0, ff=1.0, fb=0.5, fb_dt=1/1.4, ff0=0.1)
         output_layer = leabra.Layer(1, spec=output_spec, unit_spec=u_spec, name='output_layer')
         for u in output_layer.units:
             u.avg_l_lrn = 1.0
@@ -59,12 +59,12 @@ class NetworkTestBehavior(unittest.TestCase):
 
         network = leabra.Network(layers=[input_layer, output_layer], connections=[conn])
         network.set_inputs({'input_layer': [0.95]})
-        network.set_outputs({'output_layer': [1.0]})
+        network.set_outputs({'output_layer': [0.95]})
 
         logs = {'wt': []}
         for t in range(20):
-            network.trial()
             logs['wt'].append(conn.links[0].wt)
+            network.trial()
 
         check = True
         for name in ['wt']:

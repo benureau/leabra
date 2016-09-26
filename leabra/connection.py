@@ -93,7 +93,6 @@ class ConnectionSpec:
         """Transmit activity."""
         for link in connection.links:
             if not link.post.forced:
-                #print(self.st, link.wt, link.pre.act)
                 scaled_act = self.st * link.wt * link.pre.act
                 link.post.add_excitatory(scaled_act)
 
@@ -142,9 +141,7 @@ class ConnectionSpec:
 
         for link in connection.links:
             link.dwt *= (1 - link.fwt) if (link.dwt > 0) else link.fwt
-            #print('dwt', link.dwt)
             link.fwt += link.dwt
-            #print('fwt', link.fwt, 'wt', self.sig(link.fwt))
             link.wt = self.sig(link.fwt)
 
             link.dwt = 0.0
@@ -155,9 +152,6 @@ class ConnectionSpec:
         for link in connection.links:
             srs = link.post.avg_s_eff * link.pre.avg_s_eff
             srm = link.post.avg_m * link.pre.avg_m
-            #print('srs = {:.6f} [avg_s_eff {:.6f} {:.6f}'.format(srs, link.pre.avg_s_eff, link.post.avg_s_eff))
-            #print('srm = {:.6f} [avg_m     {:.6f} {:.6f}'.format(srm, link.pre.avg_m, link.post.avg_m))
-            #print('diff = {:.8f}'.format(srm-srs))
             link.dwt += (  self.lrate * ( self.m_lrn * self.xcal(srs, srm)
                          + link.post.avg_l_lrn * self.xcal(srs, link.post.avg_l)))
 

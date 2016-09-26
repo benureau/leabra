@@ -23,8 +23,8 @@ class Layer:
         self.units = [Unit(spec=unit_spec) for _ in range(self.size)]
 
         self.gc_i = 0.0
-        self.fbi = 0.0
-        self.ffi = 0.0
+        self.fbi  = 0.0
+        self.ffi  = 0.0
 
         self.connections = []
 
