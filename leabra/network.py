@@ -128,6 +128,18 @@ class Network:
         while self.quarter_nb != 4:
             assert self.cycle_count == self.spec.quarter_size
             self.quarter()
+        return self.compute_sse()
+
+    def compute_sse(self):
+        """Compute the sum of squared error in prediction (SSE).
+
+        Should be run only after the minus phase is finished.
+        """
+        sse = 0
+        for name, activities in self._outputs.items():
+            for act, unit in zip(activities, self._get_layer(name).units):
+                sse += (1.0 - unit.act_m)**2
+        return sse
 
     def end_minus_phase(self):
         """End of the minus phase. Current unit activity is stored."""

@@ -41,7 +41,9 @@ class NetworkTestBehavior(unittest.TestCase):
 
     def test_simple_pattern_learning(self):
         """Quantitative test on the pair of neurons scenario"""
-        for inhib in [True, False]:
+        check = True
+
+        for inhib in [False, True]:
             if inhib:
                 emergent_data = data.parse_weights('neuron_pair_inhib.txt')
             else:
@@ -66,20 +68,20 @@ class NetworkTestBehavior(unittest.TestCase):
             network.set_inputs({'input_layer': [0.95]})
             network.set_outputs({'output_layer': [0.95]})
 
-            logs = {'wt': []}
+            logs = {'wt': [], 'sse': []}
             for t in range(50):
                 logs['wt'].append(conn.links[0].wt)
-                network.trial()
+                sse = network.trial()
+                logs['sse'].append(sse if sse > 0.25 else 0.0)
 
-            check = True
-            for name in ['wt']:
+            for name in ['wt', 'sse']:
                 for t, (py, em) in enumerate(zip(logs[name], emergent_data[name])):
                     if not np.allclose(py, em, rtol=0, atol=1e-05):
                         print('{}:{:2d} [py] {:.10f} != {:.10f} [emergent] ({}inhib) diff={:g}'.format(
                                 name, t,   py,        em, '' if inhib else 'no ', py-em))
                         check = False
 
-            self.assertTrue(check)
+        self.assertTrue(check)
 
 
 if __name__ == '__main__':
