@@ -11,3 +11,7 @@ quantitatively.
 * **convolve_nxx1.txt**: precomputed convolution of for the noisy XX1 data.
   Generated from `emergent_projects/neuron.proj` with emergent r9985,
   with modifications in the source code to display that data.
+
+* **neuron_pair.txt** and **neuron_pair_inhib.txt**, generated from the
+  TrialOutputData of `emergent_projects/neuron_pair.proj`, with inhibition in
+  InputLayer spec off and on respectively (emergent r10073). 
