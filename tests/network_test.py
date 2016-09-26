@@ -72,7 +72,7 @@ class NetworkTestBehavior(unittest.TestCase):
             for t in range(50):
                 logs['wt'].append(conn.links[0].wt)
                 sse = network.trial()
-                logs['sse'].append(sse if sse > 0.25 else 0.0)
+                logs['sse'].append(sse)
 
             for name in ['wt', 'sse']:
                 for t, (py, em) in enumerate(zip(logs[name], emergent_data[name])):

@@ -5869,7 +5869,7 @@ Updated to 8.0 specs and programs.  No major changes -- way that Hebbian vs. Err
       dim_names {
        name="dim_names";
       [0]       };
-      width=0;
+      width=16;
      };
      int_Data @["version"] {
       UserDataItem_List @*(.user_data_) {
@@ -5893,7 +5893,7 @@ Updated to 8.0 specs and programs.  No major changes -- way that Hebbian vs. Err
       dim_names {
        name="dim_names";
       [0]       };
-      width=0;
+      width=8;
      };
     };
     data_flags=AUTO_CALC;
@@ -5903,7 +5903,7 @@ Updated to 8.0 specs and programs.  No major changes -- way that Hebbian vs. Err
     max_col_width=50;
     keygen 4 0=0;
     last_sort_spec {
-     name=;
+     name="last_sort_spec";
      ops {
       name="ops";
       el_typ=DataSortEl;
@@ -5911,7 +5911,7 @@ Updated to 8.0 specs and programs.  No major changes -- way that Hebbian vs. Err
      };
     };
     control_panel_cells {
-     name=;
+     name="control_panel_cells";
      el_typ=DataTableCell;
      el_def=0;
     };
@@ -7893,7 +7893,7 @@ Updated to 8.0 specs and programs.  No major changes -- way that Hebbian vs. Err
      };
      RndSeed @["rnd_seed"] {
       name="rnd_seed";
-      rnd_seed=2251055588;
+      rnd_seed=4009348904;
      };
     };
     types {
@@ -14806,7 +14806,7 @@ this program can be extended to do arbitrary things to generate data and apply i
     };
     UserDataItem @["view_win_top"] {
      name="view_win_top";
-     value 8 0=0.002290951;
+     value 8 0=0.05154639;
      val_type_fixed=0;
     };
     UserDataItem @["view_win_wd"] {
@@ -14816,7 +14816,7 @@ this program can be extended to do arbitrary things to generate data and apply i
     };
     UserDataItem @["view_win_ht"] {
      name="view_win_ht";
-     value 8 0=0.7983963;
+     value 8 0=0.7972509;
      val_type_fixed=0;
     };
     UserDataItem @["view_win_iconified"] {
@@ -18090,7 +18090,7 @@ taTransform @*(.m_transform) {scale={x=1: y=1: z=1: }: rotate={x=0: y=0: z=1: ro
       };
       UserDataItem @["view_win_ht"] {
        name="view_win_ht";
-       value 8 0=0.6930126;
+       value 8 0=0.6918671;
        val_type_fixed=0;
       };
       UserDataItem @["view_win_iconified"] {
@@ -18283,7 +18283,7 @@ taTransform @*(.m_transform) {scale={x=1: y=1: z=1: }: rotate={x=0: y=0: z=1: ro
      };
      act_range {min=0: max=1: range=1: scale=1: };
      bias_spec {type=LeabraBiasSpec: spec=$.projects["neuron_pair"].networks["PatAssocNet"].specs["ConSpec_0"].children["BiasSpec_0"]$: };
-     sse_tol=0.5;
+     sse_tol=0;
      act_fun=NOISY_XX1;
      act {thr=0.5: gain=100: nvar=0.005: };
      act_misc {rec_nd=1: avg_nd=1: net_gain=1: act_max_hz=100: avg_trace=0: lambda=0: avg_tau=200: avg_init=0.15: avg_dt=0.005: };

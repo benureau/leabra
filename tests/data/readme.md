@@ -13,5 +13,5 @@ quantitatively.
   with modifications in the source code to display that data.
 
 * **neuron_pair.txt** and **neuron_pair_inhib.txt**, generated from the
-  TrialOutputData of `emergent_projects/neuron_pair.proj`, with inhibition in
-  InputLayer spec off and on respectively (emergent r10073). 
+  TrialOutputData of `emergent_projects/neuron_pair.proj` (sha1: 33e58a69200af1c88f1fc07eb6770110ec00c59d),
+  with inhibition in InputLayer spec off and on respectively (emergent r10073). 
