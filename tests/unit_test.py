@@ -59,13 +59,15 @@ class UnitTestsAPI(unittest.TestCase):
             u.calculate_net_in()
             u.cycle()
 
-        self.assertEqual(u.avg_l, 0.15)
+        self.assertEqual(u.avg_l, 0.40)
         u.spec.update_avg_l(u)
-        self.assertTrue(np.allclose(0.20, u.avg_l, rtol=0.1, atol=0.1))
+        self.assertTrue(np.allclose(0.52, u.avg_l, rtol=0.1, atol=0.1))
+        #TODO: verify that 0.52 is the value of emergent
 
         for _ in range(100):
             u.spec.update_avg_l(u)
-        self.assertTrue(np.allclose(1.50, u.spec.avg_l_max, rtol=0.1, atol=0.1))
+        self.assertTrue(np.allclose(1.64, u.avg_l, rtol=0.1, atol=0.1))
+        #TODO: verify that 1.64 is the value of emergent
 
 
 class UnitTestsBehavior(unittest.TestCase):
@@ -168,9 +170,12 @@ class UnitTestsBehavior(unittest.TestCase):
             for name in receiver.logs.keys():
                 for t, (py, em) in enumerate(zip(receiver.logs[name], neuron_data[name])):
                     if not np.allclose(py, em, rtol=1e-05, atol=1e-07):
-                        print('{}:{} [py] {:.10f} != {:.10f} [emergent] ({}adapt)'.format(
+                        print('{}:{:03d} [py] {: .10f} != {: .10f} [emergent] ({}adapt)'.format(
                                name, t,   py,        em,                 '' if adapt_on else 'no '))
                         check = False
+                    elif name == 'I_net':
+                        print('{}:{:03d} [py] {: .10f} == {: .10f} [emergent] ({}adapt)'.format(
+                               name, t,   py,        em,                 '' if adapt_on else 'no '))
 
             self.assertTrue(check)
 

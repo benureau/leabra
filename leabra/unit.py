@@ -151,9 +151,9 @@ class UnitSpec:
         self.avg_s_dt   = 0.5
         self.avg_m_dt   = 0.1
         self.avg_l_dt   = 0.1 # computed once every trial
-        self.avg_l_init = 0.15
-        self.avg_l_min  = 0.1
-        self.avg_l_max  = 1.5
+        self.avg_l_init = 0.40
+        self.avg_l_min  = 0.2
+        self.avg_l_gain = 2.5
         self.avg_m_in_s = 0.1
 
         for key, value in kwargs.items():
@@ -325,7 +325,11 @@ class UnitSpec:
 
         Called at the end of every trial (*not every cycle*).
         """
-        if unit.avg_m > 0.2: # FIXME: 0.2 is a magic number here
-            unit.avg_l += self.avg_l_dt * (self.avg_l_max - unit.avg_l)
-        else:
-            unit.avg_l += self.avg_l_dt * (self.avg_l_min - unit.avg_l)
+        unit.avg_l += self.avg_l_dt * (self.avg_l_gain * unit.avg_m - unit.avg_l)
+        unit.avg_l = max(unit.avg_l, self.avg_l_min)
+
+        # if unit.avg_m > 0.2: # FIXME: 0.2 is a magic number here
+        #     unit.avg_l += self.avg_l_dt * (self.avg_l_gain - unit.avg_l)
+        # else:
+        #     unit.avg_l += self.avg_l_dt * (self.avg_l_min - unit.avg_l)
+        # unit.avg_l = 3
