@@ -108,7 +108,8 @@ default_names = ('net', 'v_m', 'I_net', 'act', 'v_m_eq', 'adapt')
 def _unit_activity_aux(data, names=default_names):
     """Display graph of best choice"""
 
-    fig = figure(x_range=[0, 200], y_range=[-0.1, 1.0],
+    x_range = [0, len(data[names[0]])]
+    fig = figure(x_range=x_range, y_range=[-0.1, 1.0],
                  plot_width=700, plot_height=450, tools="")
     fig.title.text = "Unit activity"
 
@@ -123,11 +124,11 @@ def _unit_activity_aux(data, names=default_names):
         line_dash = 'solid'
         if name == 'v_m_eq':
             line_dash = 'dashed'
-        line = fig.line(range(201), data[name], color=color, line_width=2,
+        line = fig.line(range(len(data[name])), data[name], color=color, line_width=2,
                                                              line_dash=line_dash)
         lines.append(line)
 
-    legend = Legend(legends=[(name, [line]) for name, line in zip(names, lines)],
+    legend = Legend(items=[(name, [line]) for name, line in zip(names, lines)],
                     location=(10, -40))
 
     fig.add_layout(legend, 'right')
