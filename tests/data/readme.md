@@ -12,8 +12,7 @@ emergent implementation produce the same behavior—quantitatively.
   - emergent r10726
   - sha1: 202b40a093cd8d4d3ba571fbbcbabbcedc624b7b
 
-
-* **convolve_nxx1.txt**: precomputed convolution of for the noisy XX1 data.
+* **convolve_nxx1.txt**: precomputed convolution of the noisy XX1 data.
   - generated from `emergent_projects/neuron.proj`
   - emergent r9985, with modifications in the source code to display that data.
 
