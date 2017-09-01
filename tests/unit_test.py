@@ -173,9 +173,9 @@ class UnitTestsBehavior(unittest.TestCase):
                         print('{}:{:03d} [py] {: .10f} != {: .10f} [emergent] ({}adapt)'.format(
                                name, t,   py,        em,                 '' if adapt_on else 'no '))
                         check = False
-                    elif name == 'I_net':
-                        print('{}:{:03d} [py] {: .10f} == {: .10f} [emergent] ({}adapt)'.format(
-                               name, t,   py,        em,                 '' if adapt_on else 'no '))
+                    # elif name == 'I_net':
+                    #     print('{}:{:03d} [py] {: .10f} == {: .10f} [emergent] ({}adapt)'.format(
+                    #            name, t,   py,        em,                 '' if adapt_on else 'no '))
 
             self.assertTrue(check)
 

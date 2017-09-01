@@ -256,7 +256,8 @@ class UnitSpec:
         # reseting v_m if over the threshold (spike-like behavior)
         if unit.v_m > self.act_thr:
             unit.spike = 1
-            unit.v_m = self.v_m_r
+            unit.v_m   = self.v_m_r
+            unit.I_net = 0.0
         else:
             unit.spike = 0
 
