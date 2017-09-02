@@ -29,9 +29,9 @@ class Unit:
         self.reset()
 
         # averages of the activity
-        self.avg_ss    = 0.15 # FIXME: why 0.15?
-        self.avg_s     = 0.15 # short-term average
-        self.avg_m     = 0.15 # medium-term average
+        self.avg_ss    = self.spec.avg_init # super-short-term average
+        self.avg_s     = self.spec.avg_init # short-term average
+        self.avg_m     = self.spec.avg_init # medium-term average
         self.avg_l     = self.spec.avg_l_init
         self.avg_l_lrn = 1.0  # FIXME: why 1.0?
         self.avg_s_eff = 0.0  # linear mixing of avg_s and avg_m
@@ -41,15 +41,15 @@ class Unit:
         self.ex_inputs  = []    # excitatory inputs for the next cycle
         self.forced     = False # Is activity directly set?
 
-        self.g_e     = 0           # excitatory conductance
-        self.I_net   = 0           # net current
-        self.I_net_r = self.I_net  # net current, equilibrium version (for v_m_eq)
-        self.v_m     = 0.4         # membrane potential
-        self.v_m_eq  = self.v_m    # equilibrium membrane potential
-                                   # (not reseted after a spike)
-        self.act     = 0           # current activity
-        self.act_m   = self.act    # activity at the end of the minus phase
-        self.act_nd  = self.act    # non-depressed activity # FIXME: not implemented yet
+        self.g_e     = 0                  # excitatory conductance
+        self.I_net   = 0                  # net current
+        self.I_net_r = self.I_net         # net current, equilibrium version (for v_m_eq)
+        self.v_m     = self.spec.v_m_init # membrane potential
+        self.v_m_eq  = self.v_m           # equilibrium membrane potential
+                                          # (not reseted after a spike)
+        self.act     = 0                  # current activity
+        self.act_m   = self.act           # activity at the end of the minus phase
+        self.act_nd  = self.act           # non-depressed activity # FIXME: not implemented yet
 
         self.adapt   = 0     # adaptation current: causes the rate of activation
                               # to decrease over time
@@ -138,15 +138,17 @@ class UnitSpec:
         self.act_sd     = 0.01    # standard deviation of the noisy gaussian
         # spiking behavior
         self.spk_thr    = 1.2     # spike threshold for resetting v_m # FIXME: actually used?
+        self.v_m_init   = 0.4     # init value for v_m
         self.v_m_r      = 0.3     # reset value for v_m
         # adapt behavior
         self.adapt_on   = False   # if True, enable the adapt behavior
         self.dt_adapt   = 1/144.  # time-step constant for adapt update
-        self.vm_gain    = 0.04    # FIXME: desc
-        self.spike_gain = 0.00805 # FIXME: desc
+        self.vm_gain    = 0.04    # gain on v_m driving the adaptation variable
+        self.spike_gain = 0.00805 # value to add to the adaptation variable after spiking
         # bias #FIXME: not implemented.
         self.bias       = 0.0
         # average parameters
+        self.avg_init   = 0.15
         self.avg_ss_dt  = 0.5
         self.avg_s_dt   = 0.5
         self.avg_m_dt   = 0.1
