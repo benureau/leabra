@@ -29,6 +29,7 @@ class Emergent:
         self.verbose = verbose
 
         self.p = subprocess.Popen(['emergent', '-nogui', '-server', '-p', self.project_filename])
+#        self.p = subprocess.Popen(['emergent', '-server', '-p', self.project_filename])
         self.connect()
 
     def connect(self, tries=10):
@@ -55,7 +56,7 @@ class Emergent:
         response_json = json.loads(response)
         if verbose:
             'recv: {}'.format(response_json)
-        assert response_json['status'] == 'OK'
+        assert response_json['status'] == 'OK', 'error: {}'.format(response_json)
 
     def read_socket(self):
         """Read all the data available on the socket"""
@@ -83,7 +84,7 @@ if __name__ == '__main__':
                                                      (False, 'neuron',       'neuron.proj')]:
         try:
             print('# Generating {}.dat'.format(output_filename))
-            em = Emergent('neuron.proj')
+            em = Emergent(project_filename)
             filename_cmd['var_value'] = os.path.join(datadir, output_filename)
 
             em.send({'command': 'SetVar', 'program': 'SetAdapt', 'var_name': 'adapt_on', 'var_value': adapt})
@@ -94,7 +95,33 @@ if __name__ == '__main__':
 
             print('Generated {}.dat\n'.format(output_filename))
             with open(os.path.join(datadir, output_filename + '.md'), 'w') as f:
-                f.write('`{}.dat`:\n'.format(output_filename) + 
+                f.write('`{}.dat`:\n'.format(output_filename) +
+                        '* generated from `{}` with **{}**.'.format(project_filename, emergent_version))
+
+        finally:
+            em.close()
+            time.sleep(2.0)
+
+    for inhib, output_filename, project_filename in [(True,  'neuron_pair_inhib', 'neuron_pair.proj'),
+                                                     (False, 'neuron_pair',       'neuron_pair.proj')]:
+
+        try:
+            print('# Generating {}.dat'.format(output_filename))
+            em = Emergent(project_filename)
+            filename_cmd['var_value'] = os.path.join(datadir, output_filename)
+
+            em.send({'command': 'SetVar', 'program': 'SetInhib', 'var_name': 'inhib_on', 'var_value': inhib})
+            em.send({'command': 'RunProgram', 'program': 'SetInhib'})
+            em.send({'command': 'RunProgram', 'program': 'LeabraTrain'})
+            em.send(filename_cmd)
+            em.send(save_cmd)
+
+            print('Generated {}.dat\n'.format(output_filename))
+            with open(os.path.join(datadir, output_filename + '.md'), 'w') as f:
+                f.write('`{}.dat`:\n'.format(output_filename) +
+                        '* generated from `{}` with **{}**.'.format(project_filename, emergent_version))
+            with open(os.path.join(datadir, output_filename + '_cycle.md'), 'w') as f:
+                f.write('`{}_cycle.dat`:\n'.format(output_filename) +
                         '* generated from `{}` with **{}**.'.format(project_filename, emergent_version))
 
         finally:
