@@ -152,7 +152,7 @@ class UnitTestsBehavior(unittest.TestCase):
     def test_emergent_neuron(self):
         """Test quantitative equivalence with emergent on the neuron tutorial."""
         for adapt_on in [False, True]:
-            neuron_data = data.parse_unit('neuron_adapt.txt' if adapt_on else 'neuron.txt')
+            neuron_data = data.parse_unit('neuron_adapt.dat' if adapt_on else 'neuron.dat')
 
             spec = leabra.UnitSpec(adapt_on=adapt_on, noisy_act=True)
             log_names=('net', 'I_net', 'v_m', 'act', 'v_m_eq', 'adapt',

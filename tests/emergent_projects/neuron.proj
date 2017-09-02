@@ -142,7 +142,7 @@ LeabraProject .projects[0] {
   };
  };
 
- Program_TopGroup @.programs = [3] {
+ Program_TopGroup @.programs = [4] {
   Program @[0] { 
    UserDataItem_List @*(.user_data_) {
     UserData_DocLink @[0] { };
@@ -438,6 +438,34 @@ LeabraProject .projects[0] {
       ProgArg @[3] { };
      };
     };
+   };
+  };
+  Program @[3] { 
+   ProgObjList @.objs = [0] {
+   };
+
+   ProgVar_List @.objs_vars = [0] {
+   };
+
+   ProgType_List @.types = [0] {
+   };
+
+   ProgVar_List @.args = [0] {
+   };
+
+   ProgVar_List @.vars = [2] {
+    ProgVar @[0] { };
+    ProgVar @[1] { };
+   };
+
+   Function_List @.functions = [0] {
+   };
+
+   ProgEl_List @.init_code = [0] {
+   };
+
+   ProgEl_List @.prog_code = [1] {
+    MemberAssign @[0] { };
    };
   };
   Program_Group @.gp[0] = [3] { 
@@ -5205,6 +5233,116 @@ Updated to 8.0 specs and programs.  No major changes.  Did add new short-term-pl
 </body>
 </html>
 ";
+   };
+  };
+  Program @[3] {
+   name="SetAdapt";
+   short_nm=;
+   tags=;
+   desc=;
+   version {
+    major=0;
+    minor=0;
+    step=0;
+   };
+   author=;
+   email=;
+   flags=NO_STOP_STEP|OBJS_UPDT_GUI;
+   stop_step_cond {
+    expr=;
+   };
+   objs {
+    name="objs";
+    el_typ=DataTable;
+    el_def=0;
+   };
+   objs_vars {
+    name="objs_vars";
+    el_typ=ProgVar;
+    el_def=0;
+   };
+   types {
+    name="types";
+    el_typ=DynEnumType;
+    el_def=0;
+   };
+   args {
+    name="args";
+    el_typ=ProgVar;
+    el_def=0;
+   };
+   vars {
+    name="vars";
+    el_typ=ProgVar;
+    el_def=0;
+    ProgVar @[0] {
+     name="adapt_on";
+     var_type=T_Bool;
+     bool_val=1;
+     object_scope=NULL;
+     flags=CTRL_PANEL|NULL_CHECK|SAVE_VAL|USED|EDIT_VAL;
+     reference=0;
+     desc=;
+     init_from=NULL;
+    };
+    ProgVar @[1] {
+     name="unit_spec";
+     var_type=T_Object;
+     object_type=LeabraUnitSpec;
+     object_val=$.networks[0].specs[0]$;
+     object_scope=NULL;
+     objs_ptr=0;
+     flags=CTRL_PANEL|NULL_CHECK|SAVE_VAL|USED|EDIT_VAL;
+     reference=0;
+     desc=;
+     init_from=NULL;
+    };
+   };
+   functions {
+    name="functions";
+    el_typ=Function;
+    el_def=0;
+   };
+   init_code {
+    name="init_code";
+    el_typ=ProgCode;
+    el_def=0;
+   };
+   prog_code {
+    name="prog_code";
+    el_typ=ProgCode;
+    el_def=0;
+    MemberAssign @[0] {
+     name="MemberAssign_unitspecadaptonadapton";
+     desc=;
+     flags=CAN_REVERT_TO_CODE;
+     code_string="unit_spec.adapt.on = adapt_on";
+     obj=.programs[3].vars[1]$$;
+     path="adapt.on";
+     expr {
+      expr="adapt_on";
+     };
+     update_after=1;
+    };
+   };
+   step_prog=NULL;
+   step_n=1;
+   doc {
+    name="doc";
+    desc=;
+    web_doc=0;
+    wiki=;
+    url="local";
+    full_url="local";
+    text_size=1;
+    text="<html>
+<head></head>
+<body>
+== Enter Title Here ==
+</body>
+</html>
+";
+    html_text=;
    };
   };
   Program_Group @.gp[0] {
@@ -12369,7 +12507,7 @@ taTransform @*(.m_transform) {scale={x=1: y=1: z=1: }: rotate={x=0: y=0: z=1: ro
  save_as_only=0;
  auto_name=1;
  last_change_desc="Project updated on wiki: CCN changes: got rid of app toolbar";
- tree_state{ .;.docs;.wizards;.ctrl_panels;.ctrl_panels[0];.ctrl_panels[0].mbrs;.ctrl_panels[0].mths;.data;.data.gp[0];.data.gp[1];.data.gp[2];.programs;.programs[0];.programs[2];.programs[2].objs;.programs[2].functions;.programs.gp[0];.programs.gp[0][0];.programs.gp[0][0].objs;.programs.gp[0][0].objs[0];.programs.gp[0][0].objs[0].items[6];.programs.gp[0][1];.programs.gp[0][2];.programs.gp[0][2].objs;.programs.gp[0][2].objs[0];.programs.gp[1];.networks;.networks[0];.networks[0].specs;.networks[0].specs[0];.networks[0].layers;.networks[0].weights; };
+ tree_state{ .;.docs;.wizards;.ctrl_panels;.ctrl_panels[0];.ctrl_panels[0].mbrs;.ctrl_panels[0].mths;.data;.data.gp[0];.data.gp[1];.data.gp[2];.programs;.programs[0];.programs[0].vars;.programs[2].objs;.programs[2].functions;.programs[3];.programs[3].objs;.programs[3].objs_vars;.programs[3].types;.programs[3].args;.programs[3].vars;.programs[3].functions;.programs[3].init_code;.programs[3].prog_code;.programs.gp[0];.programs.gp[0][0];.programs.gp[0][0].objs;.programs.gp[0][0].objs[0];.programs.gp[0][0].objs[0].items[6];.programs.gp[0][1];.programs.gp[0][2];.programs.gp[0][2].objs;.programs.gp[0][2].objs[0];.programs.gp[1];.networks;.networks[0];.networks[0].specs;.networks[0].specs[0];.networks[0].layers;.networks[0].weights; };
  networks {
   name="networks";
   el_typ=LeabraNetwork;
