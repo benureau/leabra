@@ -28,7 +28,7 @@ class Emergent:
         self.project_filename = os.path.join(here, project_filename)
         self.verbose = verbose
 
-        self.p = subprocess.Popen(['emergent', '-nogui', '-server', '-p', self.project_filename])
+        self.p = subprocess.Popen(['emergent', '-port', '5329','-nogui', '-server', '-p', self.project_filename])
 #        self.p = subprocess.Popen(['emergent', '-server', '-p', self.project_filename])
         self.connect()
 
@@ -37,7 +37,7 @@ class Emergent:
         while tries > 0:
             try:
                 self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                self.s.connect(('localhost', 5360))
+                self.s.connect(('localhost', 5329))
                 assert b'Emergent Server' in self.read_socket()
                 return
             except ConnectionRefusedError:
