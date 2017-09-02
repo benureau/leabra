@@ -52,7 +52,7 @@ class LayerTestsBehavior(unittest.TestCase):
 
     def test_emergent_layer(self):
         """Test quantitative equivalence with emergent on a basic layer inhibition project."""
-        emergent_data = data.parse_unit('layer_1.txt')
+        emergent_data = data.parse_unit('layer_fffb.dat')
 
         unit_spec0 = leabra.UnitSpec(adapt_on=True, noisy_act=True)
         layer_spec0 = leabra.LayerSpec(g_i=0.4, ff=1.0,fb=0.5)
