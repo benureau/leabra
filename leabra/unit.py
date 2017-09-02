@@ -203,8 +203,8 @@ class UnitSpec:
             # cutting to valid range
             xs_valid = np.arange(-ns_rng, 1.0 + res, res)  # x represents self.v_m
             conv = conv[np.searchsorted(xs, xs_valid[0],  side='left'):
-                        np.searchsorted(xs, xs_valid[-1], side='left')+1]
-            assert len(xs_valid) == len(conv)
+                        np.searchsorted(xs, xs_valid[-1], side='right')]
+            assert len(xs_valid) == len(conv), '{} != {}'.format(len(xs_valid), len(conv))
 
             self._nxx1_conv = xs_valid, conv
 

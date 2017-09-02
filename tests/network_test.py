@@ -51,7 +51,7 @@ class NetworkTestBehavior(unittest.TestCase):
                 emergent_data = data.parse_weights('neuron_pair.dat')
                 cycle_data    = data.parse_unit('neuron_pair_cycle.dat')
 
-            u_spec = leabra.UnitSpec(act_thr=0.5, act_gain=100, act_sd=0.01,
+            u_spec = leabra.UnitSpec(act_thr=0.5, act_gain=100, act_sd=0.005,
                                      g_bar_e=1.0, g_bar_i=1.0, g_bar_l=0.1,
                                      e_rev_e=1.0, e_rev_i=0.25, e_rev_l=0.3,
                                      avg_l_min=0.2, avg_l_init=0.4, avg_l_gain=2.5,
