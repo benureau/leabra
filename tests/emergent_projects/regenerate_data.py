@@ -53,9 +53,9 @@ class Emergent:
         self.s.send(('{}\n'.format(json.dumps(cmd))).encode('utf-8'))
         #check status
         response = self.read_socket()
-        response_json = json.loads(response)
+        response_json = json.loads(response.decode('utf-8'))
         if verbose:
-            'recv: {}'.format(response_json)
+            print('recv: {}'.format(response_json))
         assert response_json['status'] == 'OK', 'error: {}'.format(response_json)
 
     def read_socket(self):
