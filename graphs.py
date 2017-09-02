@@ -44,6 +44,7 @@ def tweak_fig(fig):
     disable_minor_ticks(fig)
     disable_grid(fig)
     fig.toolbar.logo = None
+    fig.toolbar_location = None
 
 def tight_layout(fig):
     fig.min_border_top    = 35
@@ -99,7 +100,7 @@ def xx1(xs, y_xx1, y_noisy_xx1, title='', width=400, height=400):
                           line_alpha=0.5, line_width=2)
     fig.line(xs, y_noisy_xx1, legend='Noisy XX1',
              color='red', line_alpha=0.5, line_width=2)
-    fig.legend.location = 'right_center'
+    fig.legend.location = 'center_right'
     bkp.show(fig)
 
 
