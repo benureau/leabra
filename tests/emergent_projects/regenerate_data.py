@@ -9,6 +9,17 @@ import subprocess
 here = os.path.dirname(__file__)
 datadir = os.path.join(here, '../data')
 
+def get_emergent_version():
+    """Get the version of the installed emergent"""
+    output_str = subprocess.check_output(['emergent', '--version'])
+    output_lines = output_str.decode('utf-8').split('\n')
+    version_str = output_lines[0]
+    assert version_str.startswith('Running ')
+    version_str = version_str[8:]
+    return version_str
+
+emergent_version = get_emergent_version()
+
 
 class Emergent:
 
@@ -68,7 +79,8 @@ if __name__ == '__main__':
     filename_cmd = {'command': 'SetVar', 'program': 'SaveOutput', 'var_name': 'file_name', 'var_value': None}
     save_cmd     = {'command': 'RunProgram', 'program': 'SaveOutput'}
 
-    for adapt, output_filename in [(True, 'neuron_adapt'), (False, 'neuron')]:
+    for adapt, output_filename, project_filename in [(True,  'neuron_adapt', 'neuron.proj'),
+                                                     (False, 'neuron',       'neuron.proj')]:
         try:
             print('# Generating {}.dat'.format(output_filename))
             em = Emergent('neuron.proj')
@@ -81,6 +93,9 @@ if __name__ == '__main__':
             em.send(save_cmd)
 
             print('Generated {}.dat\n'.format(output_filename))
+            with open(os.path.join(datadir, output_filename + '.md'), 'w') as f:
+                f.write('`{}.dat`:\n'.format(output_filename) + 
+                        '* generated from `{}` with **{}**.'.format(project_filename, emergent_version))
 
         finally:
             em.close()
