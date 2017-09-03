@@ -81,9 +81,9 @@ class UnitTestsBehavior(unittest.TestCase):
     def test_act(self):
         """Test that the unit activity is behaving well under excitation."""
 
-        spec = leabra.UnitSpec(g_bar_e=0.40, g_bar_l=2.80, g_bar_i=1.00,
+        spec = leabra.UnitSpec(g_bar_e=0.40, g_bar_l=2.80, g_bar_i=1.00, g_l=1.0,
                                e_rev_e=1.00, e_rev_l=0.15, e_rev_i=0.15,
-                               g_l=1.0, act_thr=0.25, act_gain=600.00)
+                               act_thr=0.25, act_gain=600.00, act_sd=0.01)
         u = leabra.Unit(spec=spec)
 
         for _ in range(15):
@@ -133,7 +133,8 @@ class UnitTestsBehavior(unittest.TestCase):
         """Test quantitative equivalence with emergent on the xx1 function."""
         xx1_data = data.parse_xy('convolve_nxx1.txt')
 
-        spec = leabra.UnitSpec(adapt_on=False, noisy_act=True)
+        spec = leabra.UnitSpec(adapt_on=False, noisy_act=True,
+                               act_gain=40, act_sd=0.01)
         receiver = leabra.Unit(spec=spec)
         receiver.cycle() # create the noisy_xx1 convolution
 

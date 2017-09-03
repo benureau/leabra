@@ -95,7 +95,7 @@ class Unit:
     def show_config(self):
         """Display the value of constants and state variables."""
         print('Parameters:')
-        for name in ['dt_vm', 'dt_net', 'g_l', 'g_bar_e', 'g_bar_l', 'g_bar_i',
+        for name in ['dt_v_m', 'dt_net', 'g_l', 'g_bar_e', 'g_bar_l', 'g_bar_i',
                      'e_rev_e', 'e_rev_l', 'e_rev_i', 'act_thr', 'act_gain']:
             print('   {}: {:.2f}'.format(name, getattr(self.spec, name)))
         print('State:')
@@ -121,7 +121,7 @@ class UnitSpec:
     def __init__(self, **kwargs):
         # time step constants
         self.dt_net     = 1/1.4   # for net update (net = g_e * g_bar_e)
-        self.dt_vm      = 1/3.3   # for vm update
+        self.dt_v_m     = 1/3.3   # for v_m update
         # input channels parameters
         self.g_l        = 1.0     # leak current (constant)
         self.g_bar_e    = 0.3     # excitatory maximum conductance
@@ -133,9 +133,9 @@ class UnitSpec:
         self.e_rev_l    = 0.3     # leak
         # activation function parameters
         self.act_thr    = 0.5     # threshold
-        self.act_gain   = 40      # gain
+        self.act_gain   = 100     # gain
         self.noisy_act  = True    # If True, uses the noisy activation function
-        self.act_sd     = 0.01    # standard deviation of the noisy gaussian
+        self.act_sd     = 0.01    # standard deviation of the noisy gaussian #FIXME: variance or sd?
         # spiking behavior
         self.spk_thr    = 1.2     # spike threshold for resetting v_m # FIXME: actually used?
         self.v_m_init   = 0.4     # init value for v_m
@@ -143,7 +143,7 @@ class UnitSpec:
         # adapt behavior
         self.adapt_on   = False   # if True, enable the adapt behavior
         self.dt_adapt   = 1/144.  # time-step constant for adapt update
-        self.vm_gain    = 0.04    # gain on v_m driving the adaptation variable
+        self.v_m_gain   = 0.04    # gain on v_m driving the adaptation variable
         self.spike_gain = 0.00805 # value to add to the adaptation variable after spiking
         # bias #FIXME: not implemented.
         self.bias       = 0.0
@@ -252,8 +252,8 @@ class UnitSpec:
         unit.I_net_r = self.integrate_I_net(unit, g_i, dt_integ, ratecoded=True,  steps=1) # one-step integration
 
         # updating v_m and v_m_eq
-        unit.v_m    += dt_integ * self.dt_vm * unit.I_net   # - unit.adapt is done on the I_net value.
-        unit.v_m_eq += dt_integ * self.dt_vm * unit.I_net_r
+        unit.v_m    += dt_integ * self.dt_v_m * unit.I_net   # - unit.adapt is done on the I_net value.
+        unit.v_m_eq += dt_integ * self.dt_v_m * unit.I_net_r
 
         # reseting v_m if over the threshold (spike-like behavior)
         if unit.v_m > self.act_thr:
@@ -279,13 +279,13 @@ class UnitSpec:
             new_act = act_fun(gc_e - g_e_thr)  # gc_e == unit.net
 
         # updating activity
-        unit.act_nd += dt_integ * self.dt_vm * (new_act - unit.act_nd)
+        unit.act_nd += dt_integ * self.dt_v_m * (new_act - unit.act_nd)
         unit.act = unit.act_nd # FIXME: implement stp
 
         # updating adaptation
         if self.adapt_on:
             unit.adapt += dt_integ * (
-                            self.dt_adapt * (self.vm_gain * (unit.v_m - self.e_rev_l) - unit.adapt)
+                            self.dt_adapt * (self.v_m_gain * (unit.v_m - self.e_rev_l) - unit.adapt)
                             + unit.spike * self.spike_gain
                           )
 
@@ -310,7 +310,7 @@ class UnitSpec:
                      + gc_i * (self.e_rev_i - v_m_eff)
                      + gc_l * (self.e_rev_l - v_m_eff)
                      - unit.adapt)
-            v_m_eff += dt_integ/steps * self.dt_vm * I_net
+            v_m_eff += dt_integ/steps * self.dt_v_m * I_net
 
         return I_net
 
