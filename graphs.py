@@ -87,11 +87,26 @@ def floatslider(*args, **kwargs):
 
     ## Graphs
 
-def line(xs, ys, title='', width=400, height=400):
-    fig = figure(plot_width=width, plot_height=height, tools="")
-    fig.title.text = title
-    fig.line(xs, ys)
-    bkp.show(fig)
+def line(xs, ys, std=None, fig=None, title='', width=700, height=400, dots=False, legend=None,
+         color='#00a0b0', alpha=1.0, line_width=1, show=True, **kwargs):
+
+    if fig is None:
+        fig = figure(plot_width=width, plot_height=height, tools="save", title=title, **kwargs)
+
+    fig.line(xs, ys, line_color=color, line_alpha=alpha, line_width=line_width, legend=legend, )
+    if dots:
+        fig.scatter(xs, ys, line_color=None, fill_color=color, size=4)
+    if std is not None:
+        assert len(std) == len(ys)
+        x_std = list(xs) + list(reversed(xs))
+        y_std = ([m_i + std_i for m_i, std_i in zip(ys, std)]
+                 + list(reversed([m_i - std_i for m_i, std_i in zip(ys, std)])))
+        fig.patch(x_std,  y_std, fill_color=color, fill_alpha=0.10, line_color=None)
+
+    if show:
+        bkp.show(fig)
+    else:
+        return fig
 
 def xx1(xs, y_xx1, y_noisy_xx1, title='', width=400, height=400):
     fig = figure(plot_width=width, plot_height=height, tools="")
