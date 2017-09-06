@@ -3,4 +3,5 @@ scipy
 bokeh>=0.12.6
 ipywidgets>=7.0
 jupyter
-nose
+pytest # ==3.1.3
+pytest-cov # ==2.5.1

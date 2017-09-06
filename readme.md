@@ -15,10 +15,10 @@ This is a work in progress.
 - [x] Quantitative Unit equivalence with emergent  
 - [x] Layer class
 - [x] Layer example
-- [ ] Connection & Projection classes
-- [ ] Connection & Projection example
-- [ ] XCAL learning rule
-- [ ] Network class
+- [x] Connection class
+- [ ] Connection example
+- [x] XCAL learning rule
+- [x] Network class
 - [ ] Network example
 
 ## Installation & Usage
