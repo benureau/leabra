@@ -22,9 +22,9 @@ class Layer:
         self.size = size
         self.units = [Unit(spec=unit_spec) for _ in range(self.size)]
 
-        self.gc_i = 0.0
-        self.fbi  = 0.0
-        self.ffi  = 0.0
+        self.gc_i = 0.0  # inhibitory conductance
+        self.ffi  = 0.0  # feedforward component of inhibition
+        self.fbi  = 0.0  # feedback component of inhibition
 
         self.connections = []
 
@@ -75,6 +75,7 @@ class LayerSpec:
 
     def __init__(self, **kwargs):
         """Initialize a LayerSpec"""
+        self.lay_inhib = True # activate inhibition?
 
         # time step constants:
         self.fb_dt = 1/1.4  # Integration constant for feed back inhibition
@@ -92,18 +93,18 @@ class LayerSpec:
             setattr(self, key, value)
 
     def _inhibition(self, layer):
-        """Compute inhibition"""
+        """Compute the layer inhibition"""
+        if self.lay_inhib:
+            # Calculate feed forward inhibition
+            netin = [u.g_e for u in layer.units]
+            layer.ffi = self.ff * max(0, statistics.mean(netin) - self.ff0)
 
+            # Calculate feed back inhibition
+            layer.fbi += self.fb_dt * (self.fb * statistics.mean(layer.activities) - layer.fbi)
 
-        # Calculate feed forward inhibition
-        netin = [u.g_e for u in layer.units]
-        layer.ffi = self.ff * max(0, statistics.mean(netin) - self.ff0)
-
-        # Calculate feed back inhibition
-        layer.fbi += self.fb_dt * (self.fb * statistics.mean(layer.activities) - layer.fbi)
-
-        return self.g_i * (layer.ffi + layer.fbi)
-
+            return self.g_i * (layer.ffi + layer.fbi)
+        else:
+            return 0.0
 
     def cycle(self, layer):
         """Cycle the layer, and all the units in it."""

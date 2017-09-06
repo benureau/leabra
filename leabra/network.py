@@ -3,7 +3,6 @@ class NetworkSpec:
     """Network parameters"""
 
     def __init__(self, **kwargs):
-        # time step constants
         self.quarter_size = 25  # number of cycles in a settle period
 
         for key, value in kwargs.items():

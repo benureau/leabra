@@ -101,6 +101,8 @@ class ConnectionSpec:
         if self.rnd_type == 'uniform':
             return random.uniform(self.rnd_mean - self.rnd_var,
                                   self.rnd_mean + self.rnd_var)
+        elif self.rnd_type == 'gaussian':
+            return random.gauss(self.rnd_mean, np.sqrt(self.rnd_var))
         raise NotImplementedError
 
     def _full_projection(self, connection):
@@ -131,7 +133,7 @@ class ConnectionSpec:
 
 
     def learn(self, connection):
-        if self.learn is not None:
+        if self.lrule is not None:
             self.learning_rule(connection)
             self.apply_dwt(connection)
         for link in connection.links:
@@ -167,4 +169,6 @@ class ConnectionSpec:
         return 1 / (1 + (self.sig_off * (1 - w) / w) ** self.sig_gain)
 
     def sig_inv(self, w):
+        if   w <= 0.0: return 0.0
+        elif w >= 1.0: return 1.0
         return 1 / (1 + ((1 - w) / w) ** (1 / self.sig_gain) / self.sig_off)

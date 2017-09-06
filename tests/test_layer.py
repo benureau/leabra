@@ -54,14 +54,18 @@ class LayerTestsBehavior(unittest.TestCase):
         """Test quantitative equivalence with emergent on a basic layer inhibition project."""
         emergent_data = data.parse_unit('layer_fffb.dat')
 
-        unit_spec0 = leabra.UnitSpec(adapt_on=True, noisy_act=True)
-        layer_spec0 = leabra.LayerSpec(g_i=0.4, ff=1.0,fb=0.5)
-        connection_spec0 = leabra.ConnectionSpec(proj='1to1', rnd_mean=1.0, rnd_var=0.0)
+        unit_spec = leabra.UnitSpec(adapt_on=True, noisy_act=True,
+                                    g_bar_e=0.3, g_bar_l=0.3, g_bar_i=1.0,
+                                    act_thr=0.5, act_gain=40, act_sd=0.01)
+        layer_spec = leabra.LayerSpec(g_i=0.4, ff=1.0, fb=0.5)
+        connection_spec = leabra.ConnectionSpec(proj='1to1',
+                                                rnd_mean=1.0, rnd_var=0.0)
 
-        src_layer = leabra.Layer(10, spec=layer_spec0, unit_spec=unit_spec0)
-        dst_layer = leabra.Layer(10, spec=layer_spec0, unit_spec= unit_spec0)
+        src_layer = leabra.Layer(10, spec=layer_spec, unit_spec=unit_spec)
+        dst_layer = leabra.Layer(10, spec=layer_spec, unit_spec=unit_spec)
 
-        connection0 = leabra.Connection(src_layer, dst_layer, spec=connection_spec0)
+        connection0 = leabra.Connection(src_layer, dst_layer,
+                                        spec=connection_spec)
 
         input_pattern = 5 * [1.0, 0.0]
 
@@ -79,7 +83,7 @@ class LayerTestsBehavior(unittest.TestCase):
         for name in dst_layer.units[0].logs.keys():
             for t, (py, em) in enumerate(zip(dst_layer.units[0].logs[name], emergent_data[name])):
                 if not np.allclose(py, em, rtol=1e-05, atol=1e-07):
-                    print('{}:{} [py] {:.10f} != {:.10f} [emergent]'.format(
+                    print('{}:{:3d} [py] {:.10f} != {:.10f} [emergent]'.format(
                             name, t,   py,        em))
                     check = False
 

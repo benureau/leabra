@@ -52,7 +52,8 @@ class UnitTestsAPI(unittest.TestCase):
 
     def test_avg_l(self):
         """Test that the long-term average are correctly updated."""
-        u = leabra.Unit()
+        u_spec = leabra.UnitSpec(g_bar_e=0.3, g_bar_l=0.3, g_bar_i=1.0)
+        u = leabra.Unit(spec=u_spec)
 
         for _ in range(20):
             u.add_excitatory(1.0)
@@ -155,7 +156,9 @@ class UnitTestsBehavior(unittest.TestCase):
         for adapt_on in [False, True]:
             neuron_data = data.parse_unit('neuron_adapt.dat' if adapt_on else 'neuron.dat')
 
-            spec = leabra.UnitSpec(adapt_on=adapt_on, noisy_act=True)
+            spec = leabra.UnitSpec(adapt_on=adapt_on, noisy_act=True,
+                                   g_bar_e=0.3, g_bar_l=0.3, g_bar_i=1.0,
+                                   act_gain=40, act_sd=0.01)
             log_names=('net', 'I_net', 'v_m', 'act', 'v_m_eq', 'adapt',
                        'avg_ss', 'avg_s', 'avg_m', 'avg_s_eff', 'avg_l')
             receiver = leabra.Unit(spec=spec, log_names=log_names)

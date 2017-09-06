@@ -120,17 +120,17 @@ class UnitSpec:
 
     def __init__(self, **kwargs):
         # time step constants
-        self.dt_net     = 1/1.4   # for net update (net = g_e * g_bar_e)
-        self.dt_v_m     = 1/3.3   # for v_m update
+        self.tau_net    = 1.4     # net input integration time constant (net = g_e * g_bar_e)
+        self.tau_v_m    = 3.3     # v_m integration time constant
         # input channels parameters
         self.g_l        = 1.0     # leak current (constant)
-        self.g_bar_e    = 0.3     # excitatory maximum conductance
+        self.g_bar_e    = 1.0     # excitatory maximum conductance
+        self.g_bar_l    = 0.1     # leak maximum conductance
         self.g_bar_i    = 1.0     # inhibitory maximum conductance
-        self.g_bar_l    = 0.3     # leak maximum conductance
         # reversal potential
         self.e_rev_e    = 1.0     # excitatory
-        self.e_rev_i    = 0.25    # inhibitory
         self.e_rev_l    = 0.3     # leak
+        self.e_rev_i    = 0.25    # inhibitory
         # activation function parameters
         self.act_thr    = 0.5     # threshold
         self.act_gain   = 100     # gain
@@ -159,22 +159,27 @@ class UnitSpec:
         self.avg_m_in_s = 0.1
 
         for key, value in kwargs.items():
-            assert hasattr(self, key) # making sure the parameter exists.
+            assert hasattr(self, key), 'the {} parameter does not exist'.format(key)
             setattr(self, key, value)
 
         self._nxx1_conv = None # precomputed convolution for the noisy xx1 function
 
+    @property
+    def dt_net(self):
+        return 1.0 / self.tau_net
+
+    @property
+    def dt_v_m(self):
+        return 1.0 / self.tau_v_m
 
     def copy(self):
         """Return a copy of the spec"""
         return copy.deepcopy(self)
 
-
     def xx1(self, v_m):
         """Compute the x/(x+1) function."""
         X = self.act_gain * max(v_m, 0.0)
         return X / (X + 1)
-
 
     def noisy_xx1(self, v_m):
         """Compute the noisy x/(x+1) function.
