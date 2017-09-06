@@ -1,15 +1,21 @@
 language: python
 python:
+  - "3.3"
+  - "3.4"
   - "3.5"
-
-# Cache dependencies for faster build
-cache: pip
+  - "3.6"
 
 # command to install dependencies
 install:
-  - pip install numpy
-  - pip install scipy
+  - pip install -U pip
+  - pip install codecov
+  - pip install -U -r requirements.txt
+  - python setup.py develop
 
 # command to run tests
 script:
-  - nosetests tests/
+  - pytest --cov=./
+
+# uploading coverage report
+after_success:
+  - codecov
