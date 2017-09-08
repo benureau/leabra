@@ -79,10 +79,10 @@ class Unit:
         self.act    = act  # FIXME: should the activity be delayed until the start of the next cycle?
         self.act_nd = act
 
-    def add_excitatory(self, inp_act):
+    def add_excitatory(self, inp_act, wt_scale_rel=1.0):
         """Add an input for the next cycle."""
         self.forced = False
-        self.ex_inputs.append(inp_act)
+        self.ex_inputs.append((inp_act, wt_scale_rel))
 
     def update_avg_l(self):
         return self.spec.update_avg_l(self)
@@ -231,9 +231,12 @@ class UnitSpec:
             assert len(unit.ex_inputs) == 0  # catching mistakes
             return # done!
 
-        # computing net_raw, the total, instantaneous, excitatory input for the neuron
-        net_raw = sum(unit.ex_inputs) / max(1, len(unit.ex_inputs))
-        unit.ex_inputs = []
+        net_raw = 0.0
+        if len(unit.ex_inputs) > 0:
+            # computing net_raw, the total, instantaneous, excitatory input for the neuron
+            net_raw = (sum([wt_scale_rel * inp for inp, wt_scale_rel in unit.ex_inputs])
+                       / sum([wt_scale_rel for _, wt_scale_rel in unit.ex_inputs]))
+            unit.ex_inputs = []
 
         # updating net
         unit.g_e += dt_integ * self.dt_net * (net_raw - unit.g_e)  # eq 2.16

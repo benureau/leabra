@@ -49,11 +49,11 @@ class Layer:
         for u, act in zip(self.units, activities):
             u.force_activity(act)
 
-    def add_excitatory(self, inputs):
+    def add_excitatory(self, inputs, wt_scale_rel=1.0):
         """Add excitatory inputs to the layer's units."""
         assert len(inputs) == self.size
         for u, net_raw in zip(self.units, inputs):
-            u.add_excitatory(net_raw)
+            u.add_excitatory(net_raw, wt_scale_rel=wt_scale_rel)
 
     def cycle(self):
         self.spec.cycle(self)
@@ -109,7 +109,9 @@ class LayerSpec:
     def cycle(self, layer):
         """Cycle the layer, and all the units in it."""
         # calculate net inputs for this layer
+        print(layer.name, layer.units)
         for u in layer.units:
+            print(u.ex_inputs)
             u.calculate_net_in()
 
         # update the state of the layer

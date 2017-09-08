@@ -20,10 +20,14 @@ def test_parser_matrix():
     """Test that data files with matrices are well parsed"""
     record = data.parse_unit('netin.dat')
 
-    assert record['I_net'][0][0, 0] == -0.0074677
-    assert record['I_net'][0][0, 1] ==  0.129545
-    assert record['I_net'][0][0, 2] ==  0.125024
-    assert record['I_net'][0][0, 3] ==  0.111372
+    assert record['I_net'][0][0] == 0.0423218
+    assert record['I_net'][0][1] == 0.185419
+    assert record['I_net'][0][2] == 0.180688
+    assert record['I_net'][0][3] == 0.166406
+
+    record2 = data.parse_weights('neuron_pair.dat')
+    assert record2['wt'][0].shape == (1, 1)
+    assert record2['wt'][0][0,0] == 0.5
 
 
 if __name__ == '__main__':

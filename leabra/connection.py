@@ -62,21 +62,22 @@ class ConnectionSpec:
 
     def __init__(self, **kwargs):
         """Connnection parameters"""
-        self.st       = 1.0     # connection strength
         # self.force    = False   # activity are set directly in the post_layer
         self.inhib    = False   # if True, inhibitory connection
         self.proj     = 'full'  # connection pattern between units.
                                 # Can be 'Full' or '1to1'. In the latter case,
                                 # the layers must have the same size.
-        self.lrule    = None    # the learning rule to use (None or 'leabra')
 
         # random initialization
         self.rnd_type = 'uniform' # shape of the weight initialization
         self.rnd_mean = 0.5       # mean of the random variable for weights init.
         self.rnd_var  = 0.25      # variance (or ±range for uniform)
 
+        # learning
+        self.lrule    = None    # the learning rule to use (None or 'leabra')
         self.lrate    = 0.01    # learning rate
 
+        # xcal learning
         self.m_lrn    = 1.0     # weighting of the error driven learning
 
         self.d_thr    = 0.0001
@@ -84,6 +85,10 @@ class ConnectionSpec:
 
         self.sig_off  = 1.0
         self.sig_gain = 6.0
+
+        # netin scaling
+        self.wt_scale_abs = 1.0  # absolute scaling weight: direct multiplier, strength of the connection
+        self.wt_scale_rel = 1.0  # relative scaling weight, relative to other connections.
 
         for key, value in kwargs.items():
             assert hasattr(self, key) # making sure the parameter exists.
@@ -93,8 +98,8 @@ class ConnectionSpec:
         """Transmit activity."""
         for link in connection.links:
             if not link.post.forced:
-                scaled_act = self.st * link.wt * link.pre.act
-                link.post.add_excitatory(scaled_act)
+                scaled_act = self.wt_scale_abs * link.wt * link.pre.act
+                link.post.add_excitatory(scaled_act, wt_scale_rel=self.wt_scale_rel)
 
     def _rnd_wt(self):
         """Return a random weight, according to the specified distribution"""

@@ -53,15 +53,13 @@ def parse_file(filename, fmt, trans=None):
             core_name = name[:name.index('[')] # FIXME: decode and handle matrices
             header.append(core_name)
 
-            matrix_pos = (name[name.index('[')+1:name.index(']')]).split(':')
-            assert len(matrix_pos) == 2
-            matrix_pos = (int(matrix_pos[0]), int(matrix_pos[1]))
+            matrix_pos = (name[name.index('[')+1:name.index(']')]).split(':')[1].split(',')
+            matrix_pos = tuple(int(d) for d in matrix_pos)
             matrices_pos.append(matrix_pos)
 
             if '<' in name:
-                matrix_dims = (name[name.index('<')+1:name.index('>')]).split(':')
-                assert len(matrix_dims) == 2
-                matrix_dims = (int(matrix_dims[0]), int(matrix_dims[1]))
+                matrix_dims = (name[name.index('<')+1:name.index('>')]).split(':')[1].split(',')
+                matrix_dims = tuple(int(d) for d in matrix_dims)
                 matrices_dim.append(matrix_dims)
             else:
                 matrices_dim.append(None)
@@ -90,7 +88,7 @@ def parse_file(filename, fmt, trans=None):
                 if mpos is None:
                     data[name].append(fmt[name](v))
                 else:
-                    data[name][-1][mpos[0]-1, mpos[1]] = fmt[name](v)
+                    data[name][-1][mpos] = fmt[name](v)
 
     # transforming names according to trans dict
     if trans is not None:
