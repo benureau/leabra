@@ -1,4 +1,5 @@
 import os
+import numpy as np
 
 
 unit_fmt = {'cycle': int, 'net': float, 'I_net': float,
@@ -43,18 +44,36 @@ def parse_file(filename, fmt, trans=None):
     for line in lines[1:]:
         assert len(line) == 0 or line.startswith('_D:'), 'Unrecognized format {}'.format(filepath)
 
-    header = []
+    header, matrices_pos, matrices_dim = [], [], []
     for name in lines[0].split('\t')[1:]:
         if name[0] in ['%', '|', '$', '&']:
             name = name[1:]
+
         if '[' in name:
-            name = name[:name.index('[')] # FIXME: decode and handle matrices
-        if not name in header:
+            core_name = name[:name.index('[')] # FIXME: decode and handle matrices
+            header.append(core_name)
+
+            matrix_pos = (name[name.index('[')+1:name.index(']')]).split(':')
+            assert len(matrix_pos) == 2
+            matrix_pos = (int(matrix_pos[0]), int(matrix_pos[1]))
+            matrices_pos.append(matrix_pos)
+
+            if '<' in name:
+                matrix_dims = (name[name.index('<')+1:name.index('>')]).split(':')
+                assert len(matrix_dims) == 2
+                matrix_dims = (int(matrix_dims[0]), int(matrix_dims[1]))
+                matrices_dim.append(matrix_dims)
+            else:
+                matrices_dim.append(None)
+
+        else:
+            matrices_dim.append(None)
+            matrices_pos.append(None)
             header.append(name)
+        #if not name in header:
+        #
 
-    assert len(set(header)) == len(header)
     assert set(header).issubset(set(list(fmt.keys()))), '{} != {}'.format(set(header), set(list(fmt.keys())))
-
     data = {name: [] for name in header}
 
     for line in lines[1:]:
@@ -63,12 +82,19 @@ def parse_file(filename, fmt, trans=None):
             values = [v for v in values if v != '']
             assert len(values) == len(header), 'len({}) [values] {} != {} [header] len({})'.format(values, len(values), len(header), header)
 
-            for name, v in zip(header, values):
-                data[name].append(fmt[name](v))
+            for name, dims in zip(header, matrices_dim):
+                if dims is not None:
+                    data[name].append(np.ndarray(dims))
+
+            for name, mpos, v in zip(header, matrices_pos, values):
+                if mpos is None:
+                    data[name].append(fmt[name](v))
+                else:
+                    data[name][-1][mpos[0]-1, mpos[1]] = fmt[name](v)
 
     # transforming names according to trans dict
     if trans is not None:
-        for name in header:
+        for name in set(header):
             if name in trans:
                 data[trans[name]] = data.pop(name)
 

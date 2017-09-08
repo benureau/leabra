@@ -128,6 +128,8 @@ if __name__ == '__main__':
             em.close()
             time.sleep(2.0)
 
+
+    ### layer_fffb.dat
     output_filename  = 'layer_fffb'
     project_filename = 'layer_fffb.proj'
 
@@ -137,6 +139,30 @@ if __name__ == '__main__':
         filename_cmd['var_value'] = os.path.join(datadir, output_filename)
 
         em.send({'command': 'RunProgram', 'program': 'LeabraSettle'})
+        em.send(filename_cmd)
+        em.send(save_cmd)
+
+        print('Generated {}.dat\n'.format(output_filename))
+        with open(os.path.join(datadir, output_filename + '.md'), 'w') as f:
+            f.write('`{}.dat`:\n'.format(output_filename) +
+                    '* generated from `{}` with **{}**.'.format(project_filename, emergent_version))
+
+    finally:
+        em.close()
+        time.sleep(2.0)
+
+
+    ### layer_fffb.dat
+    output_filename  = 'netin'
+    project_filename = 'netin.proj'
+
+    try:
+        print('# Generating {}.dat'.format(output_filename))
+        em = Emergent(project_filename)
+        filename_cmd['var_value'] = os.path.join(datadir, output_filename)
+
+        em.send({'command': 'RunProgram', 'program': 'DeactivateQuarter'})
+        em.send({'command': 'RunProgram', 'program': 'LeabraTrain'})
         em.send(filename_cmd)
         em.send(save_cmd)
 
