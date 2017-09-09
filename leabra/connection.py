@@ -31,6 +31,7 @@ class Connection:
         if self.spec is None:
             self.spec = ConnectionSpec()
 
+        self.wt_scale_act = 1.0  # scaling relative to activity.
         self.spec.projection_init(self)
 
         post_layer.connections.append(self)
@@ -54,7 +55,8 @@ class Connection:
     def cycle(self):
         self.spec.cycle(self)
 
-
+    def compute_netin_scaling(self):
+        self.spec.compute_netin_scaling(self)
 
 class ConnectionSpec:
 
@@ -98,7 +100,7 @@ class ConnectionSpec:
         """Transmit activity."""
         for link in connection.links:
             if not link.post.forced:
-                scaled_act = self.wt_scale_abs * link.wt * link.pre.act
+                scaled_act = self.wt_scale_abs * connection.wt_scale_act * link.wt * link.pre.act
                 link.post.add_excitatory(scaled_act, wt_scale_rel=self.wt_scale_rel)
 
     def _rnd_wt(self):
@@ -123,12 +125,31 @@ class ConnectionSpec:
     def _1to1_projection(self, connection):
         # creating unit-to-unit links
         connection.links = []
-        assert connection.pre.size == connection.post.size
+        assert len(connection.pre.units) == len(connection.post.units)
         for pre_u, post_u in zip(connection.pre.units, connection.post.units):
             w0 = self._rnd_wt()
             fw0 = self.sig_inv(w0)
             connection.links.append(Link(pre_u, post_u, w0, fw0))
 
+    def compute_netin_scaling(self, connection):
+        """Compute Netin Scaling
+
+        See https://grey.colorado.edu/emergent/index.php/Leabra_Netin_Scaling for details.
+        """
+        pre_act_avg = connection.pre.avg_act_p_eff
+        pre_size = len(connection.pre.units)
+        n_links = len(connection.links)
+
+        sem_extra = 2.0 # constant
+        pre_act_n = max(1, pre_act_avg * pre_size + 0.5) # estimated number of active units
+
+        if (n_links == pre_size):
+            connection.wt_scale_act = 1.0 / pre_act_n
+        else:
+            post_act_n_max = min(n_links, pre_act_n)
+            post_act_n_avg = max(1, pre_act_avg * n_links + 0.5)
+            post_act_n_exp = min(post_act_n_max, post_act_n_avg + sem_extra)
+            connection.wt_scale_act = 1.0 / post_act_n_exp
 
     def projection_init(self, connection):
         if self.proj == 'full':

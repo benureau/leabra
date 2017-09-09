@@ -76,6 +76,9 @@ class Network:
             self.cycle_count = 0
 
         if self.cycle_count == 0: # start of a quarter
+            #for connection in self.connections:
+            #    connection.compute_netin_scaling()
+
             if self.quarter_nb == 1: # start of trial
                 # reset all layers
                 if self.quarter_nb == 1:

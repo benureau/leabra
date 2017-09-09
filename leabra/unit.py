@@ -48,11 +48,16 @@ class Unit:
         self.v_m_eq  = self.v_m           # equilibrium membrane potential
                                           # (not reseted after a spike)
         self.act     = 0                  # current activity
-        self.act_m   = self.act           # activity at the end of the minus phase
         self.act_nd  = self.act           # non-depressed activity # FIXME: not implemented yet
+        self.act_m   = self.act           # activity at the end of the minus phase
 
         self.adapt   = 0     # adaptation current: causes the rate of activation
                               # to decrease over time
+
+    @property
+    def act_eq(self):
+        """For rate-coded units, `act` == `act_eq`. This Unit implementation is only rate-coded."""
+        return self.act
 
     def cycle(self, g_i=0.0, dt_integ=1):
         """Cycle the unit"""
