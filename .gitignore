@@ -1,4 +1,5 @@
 emergent_tutorials/
+.ignored/
 
 # macOS
 .DS_Store
