@@ -1,5 +1,9 @@
 emergent_tutorials/
 
+# emergent recovery files
+*_console[0-9].txt
+*_recover[0-9].proj
+
 # macOS
 .DS_Store
 

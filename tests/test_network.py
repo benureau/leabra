@@ -139,5 +139,58 @@ class NetworkTestBehavior(unittest.TestCase):
 
         self.assertTrue(check)
 
+
+    def test_std_project(self):
+        """Quantitative test on the template Leabra project"""
+        check = True
+        cycle_data = data.parse_unit('LeabraStd.dat')
+
+        def build_network():
+            u_spec = leabra.UnitSpec(act_thr=0.5, act_gain=100, act_sd=0.005,
+                                     g_bar_e=1.0, g_bar_l=0.1, g_bar_i=1.0,
+                                     e_rev_e=1.0, e_rev_l=0.3, e_rev_i=0.25,
+                                     avg_l_min=0.2, avg_l_init=0.4, avg_l_gain=2.5,
+                                     adapt_on=False)
+            # layers
+            input0_layer  = leabra.Layer(4, unit_spec=u_spec, name='input0_layer')
+            input1_layer  = leabra.Layer(4, unit_spec=u_spec, name='input1_layer')
+            output_spec  = leabra.LayerSpec(lay_inhib=False)
+            output_layer = leabra.Layer(4, spec=output_spec, unit_spec=u_spec, name='output_layer')
+            # connections
+            conn_spec0 = leabra.ConnectionSpec(proj='1to1', lrule=None, rnd_mean=0.5, rnd_var=0.0,
+                                               wt_scale_abs=1.0, wt_scale_rel=1.0)
+            conn_spec1 = leabra.ConnectionSpec(proj='1to1', lrule=None, rnd_mean=0.5, rnd_var=0.0,
+                                               wt_scale_abs=2.0, wt_scale_rel=1.0)
+            conn0 = leabra.Connection(input0_layer, output_layer, spec=conn_spec0)
+            conn1 = leabra.Connection(input1_layer, output_layer, spec=conn_spec1)
+            # network
+            network = leabra.Network(layers=[input0_layer, input1_layer, output_layer],
+                                     connections=[conn0, conn1])
+            network.set_inputs({'input0_layer': [0.5, 0.95, 0.0, 0.25],
+                                'input1_layer': [0.0, 0.5, 0.95, 0.75]})
+            return network
+
+        def compute_logs(network):
+            logs = {'net': [], 'act': []}
+            output_layer = network.layers[2]
+            for t in range(200):
+                network.cycle()
+                logs['net'].append(np.array([u.net for u in output_layer.units]))
+                logs['act'].append(np.array([u.act for u in output_layer.units]))
+            return logs
+
+        network = build_network()
+        logs = compute_logs(network)
+
+        for name in logs.keys():
+            for t, (py, em) in enumerate(list(zip(logs[name], cycle_data[name]))[:200]):
+                if not np.allclose(py, em, rtol=0, atol=1e-05):
+                    print('{}:{:2d} [py] {} != {} [emergent] diff={}'.format(
+                           name, t,   py,        em, py-em))
+                    check = False
+
+        self.assertTrue(check)
+
+
 if __name__ == '__main__':
     unittest.main()
