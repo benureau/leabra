@@ -1,4 +1,5 @@
 import unittest
+import os
 
 import numpy as np
 
@@ -7,6 +8,7 @@ import data
 import dotdot  # pylint: disable=unused-import
 import leabra
 
+from read_weight_file import read_weights
 
 
 class NetworkTestAPI(unittest.TestCase):
@@ -143,7 +145,7 @@ class NetworkTestBehavior(unittest.TestCase):
     def test_std_project(self):
         """Quantitative test on the template Leabra project"""
         check = True
-        cycle_data = data.parse_unit('LeabraStd.dat')
+        table_data = data.parse_unit('leabra_std_cycle.dat')
 
         def build_network():
             u_spec = leabra.UnitSpec(act_thr=0.5, act_gain=100, act_sd=0.005,
@@ -151,23 +153,31 @@ class NetworkTestBehavior(unittest.TestCase):
                                      e_rev_e=1.0, e_rev_l=0.3, e_rev_i=0.25,
                                      avg_l_min=0.2, avg_l_init=0.4, avg_l_gain=2.5,
                                      adapt_on=False)
+
             # layers
-            input0_layer  = leabra.Layer(4, unit_spec=u_spec, name='input0_layer')
-            input1_layer  = leabra.Layer(4, unit_spec=u_spec, name='input1_layer')
+            input_layer  = leabra.Layer(25, unit_spec=u_spec, name='input_layer')
+            hidden_layer = leabra.Layer(25, unit_spec=u_spec, name='hidden_layer')
             output_spec  = leabra.LayerSpec(lay_inhib=False)
-            output_layer = leabra.Layer(4, spec=output_spec, unit_spec=u_spec, name='output_layer')
+            output_layer = leabra.Layer(25, spec=output_spec, unit_spec=u_spec, name='output_layer')
+
             # connections
-            conn_spec0 = leabra.ConnectionSpec(proj='1to1', lrule=None, rnd_mean=0.5, rnd_var=0.0,
+            weights = read_weights(os.path.join(os.path.dirname(__file__), 'emergent_projects/leabra_std.wts'))
+            inphid_conn_spec = leabra.ConnectionSpec(proj='full', lrule=None, rnd_mean=0.5, rnd_var=0.0,
                                                wt_scale_abs=1.0, wt_scale_rel=1.0)
-            conn_spec1 = leabra.ConnectionSpec(proj='1to1', lrule=None, rnd_mean=0.5, rnd_var=0.0,
+            hidout_conn_spec = leabra.ConnectionSpec(proj='full', lrule=None, rnd_mean=0.5, rnd_var=0.0,
                                                wt_scale_abs=2.0, wt_scale_rel=1.0)
-            conn0 = leabra.Connection(input0_layer, output_layer, spec=conn_spec0)
-            conn1 = leabra.Connection(input1_layer, output_layer, spec=conn_spec1)
+            inphid_conn = leabra.Connection(input_layer,  hidden_layer, spec=inphid_conn_spec)
+            inphid_conn.weights = weights[('Input', 'Hidden')]
+            hidout_conn = leabra.Connection(hidden_layer, output_layer, spec=hidout_conn_spec)
+            inphid_conn.weights = weights[('Hidden', 'Output')]
+
             # network
-            network = leabra.Network(layers=[input0_layer, input1_layer, output_layer],
-                                     connections=[conn0, conn1])
-            network.set_inputs({'input0_layer': [0.5, 0.95, 0.0, 0.25],
-                                'input1_layer': [0.0, 0.5, 0.95, 0.75]})
+            network = leabra.Network(layers=[input_layer, hidden_layer, output_layer],
+                                     connections=[hidout_conn, inphid_conn])
+            network.set_inputs({'input_layer':  [0.95, 0.95, 0.95, 0.95, 0.95] + 20*[0.0],
+                                'output_layer': [0.95, 0.95, 0.95, 0.95, 0.95] + 20*[0.0]}) # FIXME 0.95 -> 1.0
+            #network.set_inputs({'input_layer': [1.0, 1.0, 1.0, 1.0, 1.0] + 20*[0.0]})
+
             return network
 
         def compute_logs(network):
@@ -183,10 +193,10 @@ class NetworkTestBehavior(unittest.TestCase):
         logs = compute_logs(network)
 
         for name in logs.keys():
-            for t, (py, em) in enumerate(list(zip(logs[name], cycle_data[name]))[:200]):
-                if not np.allclose(py, em, rtol=0, atol=1e-05):
+            for t, (py, em) in enumerate(list(zip(logs[name], table_data[name]))[:200]):
+                if not np.allclose(py[:4], em, rtol=0, atol=1e-05):
                     print('{}:{:2d} [py] {} != {} [emergent] diff={}'.format(
-                           name, t,   py,        em, py-em))
+                           name, t,   py[:4],        em, py[:4]-em))
                     check = False
 
         self.assertTrue(check)

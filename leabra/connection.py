@@ -49,6 +49,18 @@ class Connection:
                     W[i, j] = next(link_it).wt
             return W
 
+    @weights.setter
+    def weights(self, value):
+        """Override the links weights"""
+        if self.spec.proj.lower() == '1to1':
+            for wt, link in zip(value, self.links):
+                link.wt = wt
+        else:  # proj == 'full'
+            link_it = iter(self.links)  # link iterator
+            for i, pre_u in enumerate(self.pre.units):
+                for j, post_u in enumerate(self.post.units):
+                    next(link_it).wt = value[i][j]
+
     def learn(self):
         self.spec.learn(self)
 

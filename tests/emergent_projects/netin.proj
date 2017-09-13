@@ -1,5 +1,5 @@
 // ta_Dump File v3.0 -- code v8.1.1.0 rev11060
-LeabraProject .projects[0] { 
+LeabraProject .projects[1] { 
  Doc_Group @.docs = [0] {
  };
 
@@ -2373,7 +2373,7 @@ LeabraProject .projects[0] {
   };
  };
 };
-LeabraProject .projects[0] {
+LeabraProject .projects[1] {
  name="netin";
  desc=;
  tags=;
@@ -16300,12 +16300,12 @@ this program can be extended to do arbitrary things to generate data and apply i
     name="UserDataItem_List_114";
     el_typ=UserDataItem;
     el_def=0;
-    UserDataItem @[0] {name="view_win_lft": value=0.08958333: val_type_fixed=0: };
+    UserDataItem @[0] {name="view_win_lft": value=0: val_type_fixed=0: };
     UserDataItem @[1] {name="view_win_top": value=0: val_type_fixed=0: };
-    UserDataItem @[2] {name="view_win_wd": value=0.9104167: val_type_fixed=0: };
+    UserDataItem @[2] {name="view_win_wd": value=1: val_type_fixed=0: };
     UserDataItem @[3] {name="view_win_ht": value=1: val_type_fixed=0: };
     UserDataItem @[4] {name="view_win_iconified": value=0: val_type_fixed=0: };
-    UserDataItem @[5] {name="view_splitter_state": value=AAAA/wAAAAEAAAADAAABFAAAAg4AAAIiAf////8BAAAAAQA=: val_type_fixed=0: };
+    UserDataItem @[5] {name="view_splitter_state": value=AAAA/wAAAAEAAAADAAABCgAAAlwAAAGrAf////8BAAAAAQA=: val_type_fixed=0: };
    };
    name="Browser2";
    m_data=.$$;
@@ -16326,12 +16326,12 @@ this program can be extended to do arbitrary things to generate data and apply i
       name="UserDataItem_List_115";
       el_typ=UserDataItem;
       el_def=0;
-      UserDataItem @[0] {name="view_win_visible": value=1: val_type_fixed=0: };
+      UserDataItem @[0] {name="view_win_visible": value=0: val_type_fixed=0: };
      };
      name="Application";
      m_data=NULL;
      cur_font_size=12;
-     visible=1;
+     visible=0;
      lft=0;
      top=0;
      o=Horizontal;
@@ -18678,12 +18678,12 @@ taTransform @*(.m_transform) {scale={x=1: y=1: z=1: }: rotate={x=0: y=0: z=1: ro
       UserDataItem @[2] {name="view_win_wd": value=0.05694444: val_type_fixed=0: };
       UserDataItem @[3] {name="view_win_ht": value=0.8946162: val_type_fixed=0: };
       UserDataItem @[4] {name="view_win_iconified": value=0: val_type_fixed=0: };
-      UserDataItem @[5] {name="view_visible": value=1: val_type_fixed=0: };
+      UserDataItem @[5] {name="view_visible": value=0: val_type_fixed=0: };
      };
      name="Tools";
      m_data=NULL;
      cur_font_size=12;
-     visible=1;
+     visible=0;
      win_name=;
      dock_flags=DV_MOVABLE|DV_FLOATABLE;
      dock_area=1;
@@ -19275,7 +19275,7 @@ taTransform @*(.m_transform) {scale={x=1: y=1: z=1: }: rotate={x=0: y=0: z=1: ro
    lstats {trg_max_act_crit=0.5: off_errs=1: on_errs=1: agg_unlearnable=0: wt_bal=0: };
    net_misc {spike=0: deep=0: bias_learn=0: trial_decay=1: diff_scale_p=0: diff_scale_q1=0: wt_bal=1: lay_gp_inhib=0: inhib_cons=0: };
    deep {on=0: ctxt=0: raw_net=0: mod_net=0: raw_qtr=0: };
-   rel_netin {on=1: trl_skip=10: epc_skip=10: };
+   rel_netin {on=1: trl_skip=1: epc_skip=1: };
   };
  };
 };
