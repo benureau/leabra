@@ -93,90 +93,113 @@ if __name__ == '__main__':
     filename_cmd = {'command': 'SetVar', 'program': 'SaveOutput', 'var_name': 'file_name', 'var_value': None}
     save_cmd     = {'command': 'RunProgram', 'program': 'SaveOutput'}
 
-    for adapt, output_filename, project_filename in [(False, 'neuron',       'neuron.proj'),
-                                                     (True,  'neuron_adapt', 'neuron.proj')]:
-        try:
-            print('# Generating {}.dat'.format(output_filename))
-            em = Emergent(project_filename)
-            filename_cmd['var_value'] = os.path.join(datadir, output_filename)
+    # for adapt, output_filename, project_filename in [(False, 'neuron',       'neuron.proj'),
+    #                                                  (True,  'neuron_adapt', 'neuron.proj')]:
+    #     try:
+    #         print('# Generating {}.dat'.format(output_filename))
+    #         em = Emergent(project_filename)
+    #         filename_cmd['var_value'] = os.path.join(datadir, output_filename)
+    #
+    #         em.send({'command': 'SetVar', 'program': 'SetAdapt', 'var_name': 'adapt_on', 'var_value': adapt})
+    #         em.send({'command': 'RunProgram', 'program': 'SetAdapt'})
+    #         em.send(run_cmd)
+    #         em.send(filename_cmd)
+    #         em.send(save_cmd)
+    #
+    #         write_desc(project_filename, [output_filename])
+    #
+    #     finally:
+    #         em.close()
+    #         time.sleep(2.0)
+    #
+    # for inhib, output_filename, project_filename in [(False, 'neuron_pair',       'neuron_pair.proj'),
+    #                                                  (True,  'neuron_pair_inhib', 'neuron_pair.proj')]:
+    #
+    #     try:
+    #         print('# Generating {}.dat'.format(output_filename))
+    #         em = Emergent(project_filename)
+    #         filename_cmd['var_value'] = os.path.join(datadir, output_filename)
+    #
+    #         em.send({'command': 'SetVar', 'program': 'SetInhib', 'var_name': 'inhib_on', 'var_value': inhib})
+    #         em.send({'command': 'RunProgram', 'program': 'SetInhib'})
+    #         em.send({'command': 'RunProgram', 'program': 'LeabraTrain'})
+    #         em.send(filename_cmd)
+    #         em.send(save_cmd)
+    #
+    #         write_desc(project_filename, [output_filename, output_filename + '_cycle'])
+    #
+    #     finally:
+    #         em.close()
+    #         time.sleep(2.0)
+    #
+    #
+    # ### layer_fffb.dat
+    # output_filename  = 'layer_fffb'
+    # project_filename = 'layer_fffb.proj'
+    #
+    # try:
+    #     print('# Generating {}.dat'.format(output_filename))
+    #     em = Emergent(project_filename)
+    #     filename_cmd['var_value'] = os.path.join(datadir, output_filename)
+    #
+    #     em.send({'command': 'RunProgram', 'program': 'LeabraSettle'})
+    #     em.send(filename_cmd)
+    #     em.send(save_cmd)
+    #
+    #     write_desc(project_filename, [output_filename])
+    #
+    # finally:
+    #     em.close()
+    #     time.sleep(2.0)
+    #
+    #
+    # ### netin.dat
+    # output_filename  = 'netin'
+    # project_filename = 'netin.proj'
+    #
+    # try:
+    #     print('# Generating {}.dat'.format(output_filename))
+    #     em = Emergent(project_filename)
+    #     filename_cmd['var_value'] = os.path.join(datadir, output_filename)
+    #
+    #     em.send({'command': 'RunProgram', 'program': 'DeactivateQuarter'})
+    #     em.send({'command': 'RunProgram', 'program': 'LeabraTrain'})
+    #     em.send(filename_cmd)
+    #     em.send(save_cmd)
+    #
+    #     write_desc(project_filename, [output_filename])
+    #
+    # finally:
+    #     em.close()
+    #     time.sleep(2.0)
+    #
+    #
+    # ### leabra_std.dat
+    # output_filename  = 'leabra_std'
+    # project_filename = 'LeabraStd.proj'
+    #
+    # try:
+    #     print('# Generating {}.dat'.format(output_filename))
+    #     em = Emergent(project_filename)
+    #     filename_cmd['var_value'] = os.path.join(datadir, output_filename)
+    #
+    #     em.send({'command': 'RunProgram', 'program': 'DeactivateQuarter'})
+    #
+    #     em.send({'command': 'RunProgram', 'program': 'LeabraTrain'})
+    #     em.send(filename_cmd)
+    #     em.send(save_cmd)
+    #
+    #     write_desc(project_filename, [output_filename, output_filename + '_cycle'])
+    #
+    #
+    # finally:
+    #     em.close()
+    #     time.sleep(2.0)
 
-            em.send({'command': 'SetVar', 'program': 'SetAdapt', 'var_name': 'adapt_on', 'var_value': adapt})
-            em.send({'command': 'RunProgram', 'program': 'SetAdapt'})
-            em.send(run_cmd)
-            em.send(filename_cmd)
-            em.send(save_cmd)
 
-            write_desc(project_filename, [output_filename])
-
-        finally:
-            em.close()
-            time.sleep(2.0)
-
-    for inhib, output_filename, project_filename in [(False, 'neuron_pair',       'neuron_pair.proj'),
-                                                     (True,  'neuron_pair_inhib', 'neuron_pair.proj')]:
-
-        try:
-            print('# Generating {}.dat'.format(output_filename))
-            em = Emergent(project_filename)
-            filename_cmd['var_value'] = os.path.join(datadir, output_filename)
-
-            em.send({'command': 'SetVar', 'program': 'SetInhib', 'var_name': 'inhib_on', 'var_value': inhib})
-            em.send({'command': 'RunProgram', 'program': 'SetInhib'})
-            em.send({'command': 'RunProgram', 'program': 'LeabraTrain'})
-            em.send(filename_cmd)
-            em.send(save_cmd)
-
-            write_desc(project_filename, [output_filename, output_filename + '_cycle'])
-
-        finally:
-            em.close()
-            time.sleep(2.0)
-
-
-    ### layer_fffb.dat
-    output_filename  = 'layer_fffb'
-    project_filename = 'layer_fffb.proj'
-
-    try:
-        print('# Generating {}.dat'.format(output_filename))
-        em = Emergent(project_filename)
-        filename_cmd['var_value'] = os.path.join(datadir, output_filename)
-
-        em.send({'command': 'RunProgram', 'program': 'LeabraSettle'})
-        em.send(filename_cmd)
-        em.send(save_cmd)
-
-        write_desc(project_filename, [output_filename])
-
-    finally:
-        em.close()
-        time.sleep(2.0)
-
-
-    ### netin.dat
-    output_filename  = 'netin'
-    project_filename = 'netin.proj'
-
-    try:
-        print('# Generating {}.dat'.format(output_filename))
-        em = Emergent(project_filename)
-        filename_cmd['var_value'] = os.path.join(datadir, output_filename)
-
-        em.send({'command': 'RunProgram', 'program': 'DeactivateQuarter'})
-        em.send({'command': 'RunProgram', 'program': 'LeabraTrain'})
-        em.send(filename_cmd)
-        em.send(save_cmd)
-
-        write_desc(project_filename, [output_filename])
-
-    finally:
-        em.close()
-        time.sleep(2.0)
-
-
-    ### leabra_std.dat
-    output_filename  = 'leabra_std'
-    project_filename = 'LeabraStd.proj'
+    ### leabra_std4x4.dat
+    output_filename  = 'leabra_std4x4'
+    project_filename = 'LeabraStd4x4.proj'
 
     try:
         print('# Generating {}.dat'.format(output_filename))

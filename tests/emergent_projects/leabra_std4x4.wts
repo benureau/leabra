@@ -1,0 +1,169 @@
+<Fmt TEXT>
+<Name Network_0>
+<Epoch 0>
+<Lay Input>
+<acts_m_avg 0.2>
+<acts_p_avg 0.2>
+<acts_p_avg_eff 0.2>
+<adapt_gi 1>
+<margin_low_thr 0.501>
+<margin_med_thr 0.506>
+<margin_hi_thr 0.508>
+<margin_low_avg 0.25>
+<margin_med_avg 0.0375>
+<margin_hi_avg 0.175>
+<Ug>
+<UgUn 0 >
+<Un>
+0
+</Un>
+</UgUn>
+<UgUn 1 >
+<Un>
+0
+</Un>
+</UgUn>
+<UgUn 2 >
+<Un>
+0
+</Un>
+</UgUn>
+<UgUn 3 >
+<Un>
+0
+</Un>
+</UgUn>
+</Ug>
+</Lay>
+<Lay Hidden>
+<acts_m_avg 0.2>
+<acts_p_avg 0.2>
+<acts_p_avg_eff 0.2>
+<adapt_gi 1>
+<margin_low_thr 0.501>
+<margin_med_thr 0.506>
+<margin_hi_thr 0.508>
+<margin_low_avg 0.25>
+<margin_med_avg 0.0375>
+<margin_hi_avg 0.175>
+<Ug>
+<UgUn 0 >
+<Un>
+0
+<Cg 0 Fm:Input>
+<Cn 4>
+0 0.329105
+1 0.48574
+2 0.475013
+3 0.345829
+</Cn>
+</Cg>
+</Un>
+</UgUn>
+<UgUn 1 >
+<Un>
+0
+<Cg 0 Fm:Input>
+<Cn 4>
+0 0.42585
+1 0.30612
+2 0.541458
+3 0.4011
+</Cn>
+</Cg>
+</Un>
+</UgUn>
+<UgUn 2 >
+<Un>
+0
+<Cg 0 Fm:Input>
+<Cn 4>
+0 0.648537
+1 0.685893
+2 0.422191
+3 0.677834
+</Cn>
+</Cg>
+</Un>
+</UgUn>
+<UgUn 3 >
+<Un>
+0
+<Cg 0 Fm:Input>
+<Cn 4>
+0 0.689294
+1 0.37
+2 0.583633
+3 0.68093
+</Cn>
+</Cg>
+</Un>
+</UgUn>
+</Ug>
+</Lay>
+<Lay Output>
+<acts_m_avg 0.2>
+<acts_p_avg 0.2>
+<acts_p_avg_eff 0.2>
+<adapt_gi 1>
+<margin_low_thr 0.501>
+<margin_med_thr 0.506>
+<margin_hi_thr 0.508>
+<margin_low_avg 0.25>
+<margin_med_avg 0.0375>
+<margin_hi_avg 0.175>
+<Ug>
+<UgUn 0 >
+<Un>
+0
+<Cg 0 Fm:Hidden>
+<Cn 4>
+0 0.690942
+1 0.616028
+2 0.701763
+3 0.684058
+</Cn>
+</Cg>
+</Un>
+</UgUn>
+<UgUn 1 >
+<Un>
+0
+<Cg 0 Fm:Hidden>
+<Cn 4>
+0 0.6236
+1 0.435124
+2 0.408787
+3 0.598209
+</Cn>
+</Cg>
+</Un>
+</UgUn>
+<UgUn 2 >
+<Un>
+0
+<Cg 0 Fm:Hidden>
+<Cn 4>
+0 0.488714
+1 0.276429
+2 0.523499
+3 0.4708
+</Cn>
+</Cg>
+</Un>
+</UgUn>
+<UgUn 3 >
+<Un>
+0
+<Cg 0 Fm:Hidden>
+<Cn 4>
+0 0.331771
+1 0.743895
+2 0.353256
+3 0.316375
+</Cn>
+</Cg>
+</Un>
+</UgUn>
+</Ug>
+</Lay>

@@ -62,10 +62,10 @@ def _read_Cg(lines, line_cursor):
 def _post_processing(weights):
     post_weights = {}
     for key, wts_values in weights.items():
-        indexes = [index for index, wts in wts_values]
+        indexes = [to_index for to_index, wts in wts_values]
         assert set(range(len(indexes))) == set(indexes)
         from_n = None
-        for index, wts in wts_values:
+        for to_index, wts in wts_values:
             if from_n is None:
                 from_n = len(wts)
                 weight_matrix = [[] for _ in range(from_n)]
@@ -74,6 +74,7 @@ def _post_processing(weights):
             for i, w in enumerate(wts):
                 weight_matrix[i].append(w)
         post_weights[key] = weight_matrix
+        print(weight_matrix)
 
     return post_weights
 

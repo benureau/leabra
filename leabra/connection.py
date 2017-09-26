@@ -7,12 +7,21 @@ import numpy as np
 class Link:
     """A link between two units. Simple, non active class."""
 
-    def __init__(self, pre_unit, post_unit, w0, fw0):
+    def __init__(self, pre_unit, post_unit, w0, fw0, index=None):
+        """
+        Parameters:
+            pre_unit   the unit sending its activity
+            post_unit  the unit receiving the activity
+            w0         the initial weight value
+            fw0        initial value of the fast weight parameter
+            index      position in the weight matrix
+        """
         self.pre  = pre_unit
         self.post = post_unit
         self.wt   = w0
         self.fwt  = fw0
         self.dwt  = 0.0
+        self.key  = None
 
 
 class Connection:
@@ -139,22 +148,20 @@ class ConnectionSpec:
     def _full_projection(self, connection):
         # creating unit-to-unit links
         connection.links = []
-        for pre_u in connection.pre.units:
-            for post_u in connection.post.units:
+        for i, pre_u in enumerate(connection.pre.units):
+            for j, post_u in enumerate(connection.post.units):
                 w0 = self._rnd_wt()
                 fw0 = self.sig_inv(w0)
-                connection.links.append(Link(pre_u, post_u, w0, fw0))
-        print(len(connection.links))
-
+                connection.links.append(Link(pre_u, post_u, w0, fw0, index=(i, j)))
 
     def _1to1_projection(self, connection):
         # creating unit-to-unit links
         connection.links = []
         assert len(connection.pre.units) == len(connection.post.units)
-        for pre_u, post_u in zip(connection.pre.units, connection.post.units):
+        for i, (pre_u, post_u) in enumerate(zip(connection.pre.units, connection.post.units)):
             w0 = self._rnd_wt()
             fw0 = self.sig_inv(w0)
-            connection.links.append(Link(pre_u, post_u, w0, fw0))
+            connection.links.append(Link(pre_u, post_u, w0, fw0, index=(i, i)))
 
     def compute_netin_scaling(self, connection):
         """Compute Netin Scaling
