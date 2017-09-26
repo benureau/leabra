@@ -66,6 +66,8 @@ class LayerTestsBehavior(unittest.TestCase):
 
         connection0 = leabra.Connection(src_layer, dst_layer,
                                         spec=connection_spec)
+        connection0.wt_scale_rel_eff = 1.0 # because we don't use the Network that initialize this
+                                           # value here.
 
         input_pattern = 5 * [1.0, 0.0]
 

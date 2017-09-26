@@ -28,7 +28,8 @@ class Layer:
         self.avg_act       = 0.0  # average activity, computed after every cycle.
         self.avg_act_p_eff = self.spec.avg_act_targ_init
 
-        self.connections = []
+        self.from_connections = [] # connections from this layer
+        self.to_connections   = [] # connections to this layer
 
     def reset(self):
         """Reset all the units in the layer"""
@@ -51,11 +52,11 @@ class Layer:
         for u, act in zip(self.units, activities):
             u.force_activity(act)
 
-    def add_excitatory(self, inputs, wt_scale_rel=1.0):
+    def add_excitatory(self, inputs):
         """Add excitatory inputs to the layer's units."""
         assert len(inputs) == len(self.units)
         for u, net_raw in zip(self.units, inputs):
-            u.add_excitatory(net_raw, wt_scale_rel=wt_scale_rel)
+            u.add_excitatory(net_raw)
 
     def cycle(self):
         self.spec.cycle(self)

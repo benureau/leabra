@@ -84,10 +84,10 @@ class Unit:
         self.act    = act  # FIXME: should the activity be delayed until the start of the next cycle?
         self.act_nd = act
 
-    def add_excitatory(self, inp_act, wt_scale_rel=1.0):
+    def add_excitatory(self, inp_act):
         """Add an input for the next cycle."""
         self.forced = False
-        self.ex_inputs.append((inp_act, wt_scale_rel))
+        self.ex_inputs.append(inp_act)
 
     def update_avg_l(self):
         return self.spec.update_avg_l(self)
@@ -141,10 +141,14 @@ class UnitSpec:
         self.act_gain   = 100     # gain
         self.noisy_act  = True    # If True, uses the noisy activation function
         self.act_sd     = 0.01    # standard deviation of the noisy gaussian #FIXME: variance or sd?
+        self.act_min    = 0.0     # clamp ranges (min, max) for the activation value.
+        self.act_max    = 0.95    #
         # spiking behavior
         self.spk_thr    = 1.2     # spike threshold for resetting v_m # FIXME: actually used?
         self.v_m_init   = 0.4     # init value for v_m
         self.v_m_r      = 0.3     # reset value for v_m
+        self.v_m_min    = 0.0     # clamp ranges (min, max) for v_m
+        self.v_m_max    = 2.0     #
         # adapt behavior
         self.adapt_on   = False   # if True, enable the adapt behavior
         self.dt_adapt   = 1/144.  # time-step constant for adapt update
@@ -223,8 +227,8 @@ class UnitSpec:
         xs, conv = self._nxx1_conv
         if v_m < xs[0]:
             return 0.0
-        elif v_m > xs[-1]:
-            return self.xx1(xs)
+        elif xs[-1] < v_m:
+            return self.xx1(xs[-1])
         else:
             return float(scipy.interpolate.interp1d(xs, conv, kind='linear',
                                                     fill_value='extrapolate')(v_m))
@@ -239,8 +243,7 @@ class UnitSpec:
         net_raw = 0.0
         if len(unit.ex_inputs) > 0:
             # computing net_raw, the total, instantaneous, excitatory input for the neuron
-            net_raw = (sum([wt_scale_rel * inp for inp, wt_scale_rel in unit.ex_inputs])
-                       / sum([wt_scale_rel for _, wt_scale_rel in unit.ex_inputs]))
+            net_raw = sum(unit.ex_inputs)
             unit.ex_inputs = []
 
         # updating net
@@ -267,6 +270,7 @@ class UnitSpec:
         # updating v_m and v_m_eq
         unit.v_m    += dt_integ * self.dt_v_m * unit.I_net   # - unit.adapt is done on the I_net value.
         unit.v_m_eq += dt_integ * self.dt_v_m * unit.I_net_r
+        #unit.v_m     = max(self.v_m_min, min(unit.v_m, self.v_m_max))
 
         # reseting v_m if over the threshold (spike-like behavior)
         if unit.v_m > self.act_thr:
@@ -289,10 +293,12 @@ class UnitSpec:
             g_e_thr = (  gc_i * (self.e_rev_i - self.act_thr)
                        + gc_l * (self.e_rev_l - self.act_thr)
                        - unit.adapt) / (self.act_thr - self.e_rev_e)
+
             new_act = act_fun(gc_e - g_e_thr)  # gc_e == unit.net
 
         # updating activity
         unit.act_nd += dt_integ * self.dt_v_m * (new_act - unit.act_nd)
+        #unit.act_nd = max(self.act_min, min(unit.act_nd, self.act_max))
         unit.act = unit.act_nd # FIXME: implement stp
 
         # updating adaptation

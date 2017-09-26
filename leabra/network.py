@@ -26,14 +26,26 @@ class Network:
         self.connections = list(connections)
 
         self._inputs, self._outputs = {}, {}
-
+        self.build()
 
     def add_connection(self, connection):
         self.connections.append(connection)
+        self.build()
 
     def add_layer(self, layer):
         self.layers.append(layer)
 
+    def build(self):
+        """Precompute necessary network datastructures.
+
+        This needs to be run every time a layer or connection is added or removed from the network,
+        or if the value of a connection's `wt_scale_rel` is changed. This automatically run when
+        using the `add_connection()` method.
+        """
+        for layer in self.layers:
+            for connection in layer.to_connections:
+                rel_sum = sum(connection.spec.wt_scale_rel for connection in self.connections)
+                connection.wt_scale_rel_eff = connection.spec.wt_scale_rel / rel_sum
 
     def _get_layer(self, name):
         """Get a layer from its name.

@@ -32,9 +32,21 @@ class Connection:
             self.spec = ConnectionSpec()
 
         self.wt_scale_act = 1.0  # scaling relative to activity.
+        self.wt_scale_rel_eff = None  # effective relative scaling weight, once other connections
+                                      # are taken into account (computed by the network).
+
         self.spec.projection_init(self)
 
-        post_layer.connections.append(self)
+        pre_layer.from_connections.append(self)
+        post_layer.to_connections.append(self)
+
+    @property
+    def wt_scale(self):
+        try:
+            return self.wt_scale_act * self.wt_scale_rel_eff
+        except TypeError as e:
+            print('Error: did you correctly run the network.build() method?')
+            raise e
 
     @property
     def weights(self):
@@ -112,8 +124,8 @@ class ConnectionSpec:
         """Transmit activity."""
         for link in connection.links:
             if not link.post.forced:
-                scaled_act = self.wt_scale_abs * connection.wt_scale_act * link.wt * link.pre.act
-                link.post.add_excitatory(scaled_act, wt_scale_rel=self.wt_scale_rel)
+                scaled_act = self.wt_scale_abs * connection.wt_scale * link.wt * link.pre.act
+                link.post.add_excitatory(scaled_act)
 
     def _rnd_wt(self):
         """Return a random weight, according to the specified distribution"""
@@ -132,6 +144,7 @@ class ConnectionSpec:
                 w0 = self._rnd_wt()
                 fw0 = self.sig_inv(w0)
                 connection.links.append(Link(pre_u, post_u, w0, fw0))
+        print(len(connection.links))
 
 
     def _1to1_projection(self, connection):
