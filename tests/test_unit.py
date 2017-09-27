@@ -8,6 +8,8 @@ import data
 import dotdot  # pylint: disable=unused-import
 import leabra
 
+from utils import quantitative_match
+
 
 
 class UnitTestsAPI(unittest.TestCase):
@@ -153,6 +155,8 @@ class UnitTestsBehavior(unittest.TestCase):
 
     def test_emergent_neuron(self):
         """Test quantitative equivalence with emergent on the neuron tutorial."""
+        check = True
+
         for adapt_on in [False, True]:
             neuron_data = data.parse_unit('neuron_adapt.dat' if adapt_on else 'neuron.dat')
 
@@ -170,18 +174,12 @@ class UnitTestsBehavior(unittest.TestCase):
                 receiver.calculate_net_in()
                 receiver.cycle()
 
-            check = True
-            for name in receiver.logs.keys():
-                for t, (py, em) in enumerate(zip(receiver.logs[name], neuron_data[name])):
-                    if not np.allclose(py, em, rtol=1e-05, atol=1e-07):
-                        print('{}:{:03d} [py] {: .10f} != {: .10f} [emergent] ({}adapt)'.format(
-                               name, t,   py,        em,                 '' if adapt_on else 'no '))
-                        check = False
-                    # elif name == 'I_net':
-                    #     print('{}:{:03d} [py] {: .10f} == {: .10f} [emergent] ({}adapt)'.format(
-                    #            name, t,   py,        em,                 '' if adapt_on else 'no '))
+            # note that here there seems to be a bit of drift on I_net after the 190 time mark.
+            # possibly because of the single/double float precision discrepancy.
+            check = quantitative_match(receiver.logs, neuron_data, rtol=2e-05, atol=1e-08, check=check)
 
-            self.assertTrue(check)
+
+        self.assertTrue(check)
 
 
 if __name__ == '__main__':

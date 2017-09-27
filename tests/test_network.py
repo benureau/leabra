@@ -9,6 +9,7 @@ import dotdot  # pylint: disable=unused-import
 import leabra
 
 from read_weight_file import read_weights
+from utils import quantitative_match
 
 
 class NetworkTestAPI(unittest.TestCase):
@@ -45,14 +46,7 @@ class NetworkTestBehavior(unittest.TestCase):
         """Quantitative test on the pair of neurons scenario"""
         check = True
 
-        for inhib in [True, False]:
-            if inhib:
-                emergent_data = data.parse_weights('neuron_pair_inhib.dat')
-                cycle_data    = data.parse_unit('neuron_pair_inhib_cycle.dat')
-            else:
-                emergent_data = data.parse_weights('neuron_pair.dat')
-                cycle_data    = data.parse_unit('neuron_pair_cycle.dat')
-
+        def build_network(inhib):
             u_spec = leabra.UnitSpec(act_thr=0.5, act_gain=100, act_sd=0.005,
                                      g_bar_e=1.0, g_bar_i=1.0, g_bar_l=0.1,
                                      e_rev_e=1.0, e_rev_i=0.25, e_rev_l=0.3,
@@ -72,27 +66,28 @@ class NetworkTestBehavior(unittest.TestCase):
             network.set_inputs({'input_layer': [0.95]})
             network.set_outputs({'output_layer': [0.95]})
 
-            logs = {'wt': [], 'sse': [], 'output_act_m': []}
-            for t in range(50):
-                logs['wt'].append(conn.links[0].wt)
-                sse = network.trial()
-                logs['sse'].append(sse)
-                logs['output_act_m'].append(output_layer.units[0].act_m)
+        # def compute_logs():
+        #     logs = {'wt': [], 'sse': [], 'output_act_m': []}
+        #     for t in range(50):
+        #         logs['wt'].append(conn.links[0].wt)
+        #         sse = network.trial()
+        #         logs['sse'].append(sse)
+        #         logs['output_act_m'].append(output_layer.units[0].act_m)
 
-            output_unit = output_layer.units[0]
-            for name in output_unit.logs.keys():
-                for t, (py, em) in enumerate(list(zip(output_unit.logs[name], cycle_data[name]))[:50]):
-                    if not np.allclose(py, em, rtol=0, atol=1e-05):
-                        print('{}:{:2d} [py] {:.10f} != {:.10f} [emergent] ({}inhib) diff={:g}'.format(
-                               name, t,   py,        em,       '' if inhib else 'no ', py-em))
-                        check = False
+        for inhib in [True, False]:
+            suffix = '_inhib' if inhib else ''
+            emergent_data = data.parse_weights('neuron_pair{}.dat'.format(suffix))
+            cycle_data    = data.parse_unit('neuron_pair{}_cycle.dat'.format(suffix))
+
+            network = build_network(inhib)
+            check = quantitative_match(network.layers[1].units[0].logs, cycle_data,
+                                       rtol=2e-05, atol=0, check=check)
 
         self.assertTrue(check)
 
 
     def test_netin_scaling(self):
         """Quantitative test on the netin scaling scenario"""
-        check = True
         cycle_data = data.parse_unit('netin.dat')
 
         def build_network():
@@ -132,14 +127,7 @@ class NetworkTestBehavior(unittest.TestCase):
         network = build_network()
         logs = compute_logs(network)
 
-        for name in logs.keys():
-            for t, (py, em) in enumerate(list(zip(logs[name], cycle_data[name]))[:200]):
-                if not np.allclose(py, em, rtol=0, atol=1e-05):
-                    print('{}:{:2d} [py] {} != {} [emergent] diff={}'.format(
-                           name, t,   py,        em, py-em))
-                    check = False
-
-        self.assertTrue(check)
+        self.assertTrue(quantitative_match(logs, cycle_data, rtol=2e-05, atol=0))
 
 
     def test_std_project(self):
@@ -194,15 +182,7 @@ class NetworkTestBehavior(unittest.TestCase):
 
         network = build_network()
         logs = compute_logs(network)
-
-        for name in logs.keys():
-            for t, (py, em) in enumerate(list(zip(logs[name], table_data[name]))[:100]):
-                if not np.allclose(py[:4], em, rtol=0, atol=1e-05):
-                    print('{}:{:2d} [py] {} != {} [emergent] diff={}'.format(
-                           name, t,   py[:4],        em, py[:4]-em))
-                    check = False
-
-        self.assertTrue(check)
+        self.assertTrue(quantitative_match(logs, table_data, rtol=2e-05, atol=0))
 
 
 if __name__ == '__main__':

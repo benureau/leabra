@@ -8,6 +8,7 @@ import data
 import dotdot  # pylint: disable=unused-import
 import leabra
 
+from utils import quantitative_match
 
 
 class LayerTestAPI(unittest.TestCase):
@@ -80,16 +81,7 @@ class LayerTestsBehavior(unittest.TestCase):
             connection0.cycle()
             dst_layer.cycle()
 
-
-        check = True
-        for name in dst_layer.units[0].logs.keys():
-            for t, (py, em) in enumerate(zip(dst_layer.units[0].logs[name], emergent_data[name])):
-                if not np.allclose(py, em, rtol=1e-05, atol=1e-07):
-                    print('{}:{:3d} [py] {:.10f} != {:.10f} [emergent]'.format(
-                            name, t,   py,        em))
-                    check = False
-
-        self.assertTrue(check)
+        self.assertTrue(quantitative_match(dst_layer.units[0].logs, emergent_data, rtol=2e-05, atol=0))
 
 
 if __name__ == '__main__':
