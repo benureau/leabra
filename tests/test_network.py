@@ -159,15 +159,14 @@ class NetworkTestBehavior(unittest.TestCase):
             hidout_conn = leabra.Connection(hidden_layer, output_layer, spec=hidout_conn_spec)
             hidout_conn.weights = weights[('Hidden', 'Output')]
 
-            print([link.wt for link in inphid_conn.links if link.post == hidden_layer.units[0]])
+            #print([link.wt for link in inphid_conn.links if link.post == hidden_layer.units[0]])
 
             # network
-            network = leabra.Network(layers=[input_layer, hidden_layer],# output_layer],
-                                     connections=[inphid_conn])#, hidout_conn, ])
+            network = leabra.Network(layers=[input_layer, hidden_layer, output_layer],
+                                     connections=[inphid_conn, hidout_conn])
             n_sqrt = int(round(np.sqrt(n)))
-            print('n_sqrt {}'.format(n_sqrt))
-            network.set_inputs({'input_layer':  [0.95]*n_sqrt + [0.0]*(n-n_sqrt)})
-                                    #'output_layer': [0.0, 0.0, 0.95, 0.95]}) # FIXME 0.95 -> 1.0
+            network.set_inputs({'input_layer':  [0.95]*n_sqrt + [0.0]*(n-n_sqrt)})#,
+                                #'output_layer': [0.0]*(n-n_sqrt) + [0.95]*n_sqrt}) # FIXME 0.95 -> 1.0
 
             return network
 
@@ -191,7 +190,7 @@ class NetworkTestBehavior(unittest.TestCase):
             logs = compute_logs(network)
             for name in logs.keys():
                 for t, (py, em) in enumerate(list(zip(logs[name], table_data[name]))[:-1]):
-                    #py = py[:4]
+                    py = py[:4]
                     if not np.allclose(py, em, rtol=2e-05, atol=0):
                         print('{}:{:2d} [py] {} != {} [em] diff={} (n={})'.format(
                                name, t,      py,  em,        py-em,   n))

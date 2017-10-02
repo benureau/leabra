@@ -43,8 +43,8 @@ class Network:
         using the `add_connection()` method.
         """
         for layer in self.layers:
+            rel_sum = sum(connection.spec.wt_scale_rel for connection in layer.to_connections)
             for connection in layer.to_connections:
-                rel_sum = sum(connection.spec.wt_scale_rel for connection in self.connections)
                 connection.wt_scale_rel_eff = connection.spec.wt_scale_rel / rel_sum
 
     def _get_layer(self, name):
@@ -88,8 +88,8 @@ class Network:
             self.cycle_count = 0
 
         if self.cycle_count == 0: # start of a quarter
-            #for connection in self.connections:
-            #    connection.compute_netin_scaling()
+            for connection in self.connections:
+               connection.compute_netin_scaling()
 
             if self.quarter_nb == 1: # start of trial
                 # reset all layers

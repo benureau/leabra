@@ -173,7 +173,7 @@ class ConnectionSpec:
         n_links = len(connection.links)
 
         sem_extra = 2.0 # constant
-        pre_act_n = max(1, pre_act_avg * pre_size + 0.5) # estimated number of active units
+        pre_act_n = max(1, int(pre_act_avg * pre_size + 0.5)) # estimated number of active units
 
         if (n_links == pre_size):
             connection.wt_scale_act = 1.0 / pre_act_n
