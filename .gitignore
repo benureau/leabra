@@ -1,4 +1,5 @@
 emergent_tutorials/
+.ignored/
 
 # emergent recovery files
 *_console[0-9].txt
