@@ -198,23 +198,24 @@ if __name__ == '__main__':
 
 
     ### leabra_std4x4.dat
-    output_filename  = 'leabra_std4x4'
-    project_filename = 'LeabraStd4x4.proj'
+    for n in [4, 25]:
+        output_filename  = 'leabra_std{}'.format(n)
+        project_filename = 'LeabraStd{}.proj'.format(n)
 
-    try:
-        print('# Generating {}.dat'.format(output_filename))
-        em = Emergent(project_filename)
-        filename_cmd['var_value'] = os.path.join(datadir, output_filename)
+        try:
+            print('# Generating {}.dat'.format(output_filename))
+            em = Emergent(project_filename)
+            filename_cmd['var_value'] = os.path.join(datadir, output_filename)
 
-        em.send({'command': 'RunProgram', 'program': 'DeactivateQuarter'})
+            em.send({'command': 'RunProgram', 'program': 'DeactivateQuarter'})
 
-        em.send({'command': 'RunProgram', 'program': 'LeabraTrain'})
-        em.send(filename_cmd)
-        em.send(save_cmd)
+            em.send({'command': 'RunProgram', 'program': 'LeabraTrain'})
+            em.send(filename_cmd)
+            em.send(save_cmd)
 
-        write_desc(project_filename, [output_filename, output_filename + '_cycle'])
+            write_desc(project_filename, [output_filename, output_filename + '_cycle'])
 
 
-    finally:
-        em.close()
-        time.sleep(2.0)
+        finally:
+            em.close()
+            time.sleep(2.0)
