@@ -41,6 +41,7 @@ def test_network(network, input_pattern):
 def train_network(network, input_pattern, output_pattern):
     """Run one trial on the network"""
     assert len(network.layers[0].units) == len(input_pattern)
+
     assert len(network.layers[-1].units) == len(output_pattern)
     network.set_inputs({'input_layer': input_pattern})
     network.set_outputs({'output_layer': output_pattern})
@@ -50,5 +51,8 @@ def train_network(network, input_pattern, output_pattern):
 
 
 if __name__ == '__main__':
-    network = build_network(100, 25, 5)
-    print(test_network(network, 50*[1.0, 0.0]))
+    network = build_network(36, 24, 1)
+    print(test_network(network, 18*[1.0, 0.0]))
+    print(train_network(network, 18*[1.0, 0.0], 12*[0.0, 1.0]))
+    print(train_network(network, 18*[1.0, 0.0], 12*[0.0, 1.0]))
+    print(train_network(network, 18*[1.0, 0.0], 12*[0.0, 1.0]))
