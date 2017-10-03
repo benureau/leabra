@@ -34,11 +34,19 @@ def build_network(n_input, n_output, n_hidden):
 def test_network(network, input_pattern):
     assert len(network.layers[0].units) == len(input_pattern)
     network.set_inputs({'input_layer': input_pattern})
-    for i in range(3):
-        network.quarter()
-    acts = network.layers[-1].activities
-    network.quarter()
-    return acts
+
+    network.trial()
+    return [unit.act_m for unit in network.layers[-1].units]
+
+def train_network(network, input_pattern, output_pattern):
+    """Run one trial on the network"""
+    assert len(network.layers[0].units) == len(input_pattern)
+    assert len(network.layers[-1].units) == len(output_pattern)
+    network.set_inputs({'input_layer': input_pattern})
+    network.set_outputs({'output_layer': output_pattern})
+
+    network.trial()
+    return [unit.act_m for unit in network.layers[-1].units]
 
 
 if __name__ == '__main__':

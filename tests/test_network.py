@@ -159,14 +159,12 @@ class NetworkTestBehavior(unittest.TestCase):
             hidout_conn = leabra.Connection(hidden_layer, output_layer, spec=hidout_conn_spec)
             hidout_conn.weights = weights[('Hidden', 'Output')]
 
-            #print([link.wt for link in inphid_conn.links if link.post == hidden_layer.units[0]])
-
             # network
             network = leabra.Network(layers=[input_layer, hidden_layer, output_layer],
                                      connections=[inphid_conn, hidout_conn])
             n_sqrt = int(round(np.sqrt(n)))
-            network.set_inputs({'input_layer':  [0.95]*n_sqrt + [0.0]*(n-n_sqrt)})#,
-                                #'output_layer': [0.0]*(n-n_sqrt) + [0.95]*n_sqrt}) # FIXME 0.95 -> 1.0
+            network.set_inputs ({'input_layer' : [0.95]*n_sqrt + [0.0]*(n-n_sqrt)})
+            network.set_outputs({'output_layer': [0.0]*(n-n_sqrt) + [0.95]*n_sqrt}) # FIXME 0.95 -> 1.0
 
             return network
 

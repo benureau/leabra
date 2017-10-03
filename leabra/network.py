@@ -100,7 +100,7 @@ class Network:
                 for name, activities in self._inputs.items():
                     self._get_layer(name).force_activity(activities)
 
-            elif self.quarter_nb == 4: # start of minus phase
+            elif self.quarter_nb == 4: # start of plus phase
                 # force activities for outputs
                 for name, activities in self._outputs.items():
                     self._get_layer(name).force_activity(activities)
@@ -152,7 +152,7 @@ class Network:
         sse = 0
         for name, activities in self._outputs.items():
             for act, unit in zip(activities, self._get_layer(name).units):
-                sse += (1.0 - unit.act_m)**2
+                sse += (act - unit.act_m)**2
         return sse
 
     def end_minus_phase(self):
