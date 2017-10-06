@@ -1,5 +1,5 @@
 // ta_Dump File v3.0 -- code v8.1.1.0 rev11060
-LeabraProject .projects[1] { 
+LeabraProject .projects[0] { 
  Doc_Group @.docs = [2] {
   taDoc @[0] { 
    UserDataItem_List @*(.user_data_) {
@@ -106,12 +106,11 @@ LeabraProject .projects[1] {
   };
   DataTable_Group @.gp[1] = [4] { 
    DataTable @[0] { 
-    DataTableCols @.data = [5] {
+    DataTableCols @.data = [4] {
      String_Data @[0] { };
      float_Data @[1] { };
      float_Data @[2] { };
      float_Data @[3] { };
-     Variant_Data @[4] { };
     };
 
     DataOpList @.last_sort_spec.ops = [0] {
@@ -2206,12 +2205,11 @@ LeabraProject .projects[1] {
       T3Panel @[4] { 
        T3DataView_List @.root_view.children = [1] {
 	GridTableView @[0] { 
-	 T3DataView_List @.children = [5] {
+	 T3DataView_List @.children = [4] {
 	  GridColView @[0] { };
 	  GridColView @[1] { };
 	  GridColView @[2] { };
 	  GridColView @[3] { };
-	  GridColView @[4] { };
 	 };
 
 	 T3Annotation_List @.annotations = [0] {
@@ -2421,7 +2419,7 @@ LeabraProject .projects[1] {
   };
  };
 };
-LeabraProject .projects[1] {
+LeabraProject .projects[0] {
  name="neuron_pair";
  desc="Network learns to associate input and output patterns -- Hebbian learning can learn easy mappings, but not more difficult ones -- Error-driven learning is necessary for those.";
  tags="Learning, Pattern Association, Hebbian, Error-Driven";
@@ -3236,7 +3234,7 @@ Updated to 8.0 specs and programs.  No major changes -- way that Hebbian vs. Err
       matrix_col_width=10;
       ar {
        name="ar";
-      [1 1 4] 1;0;0;0;      };
+      [1 1 4] 0.94999999;0;0;0;      };
      };
      float_Data @[2] {
       name="Output";
@@ -3253,7 +3251,7 @@ Updated to 8.0 specs and programs.  No major changes -- way that Hebbian vs. Err
       matrix_col_width=10;
       ar {
        name="ar";
-      [1 1 4] 1;0;0;0;      };
+      [1 1 4] 0.94999999;0;0;0;      };
      };
     };
     data_flags=SAVE_ROWS|AUTO_CALC;
@@ -3509,23 +3507,6 @@ Updated to 8.0 specs and programs.  No major changes -- way that Hebbian vs. Err
        name="dim_names";
       [2] ;;      };
       width=12;
-      matrix_col_width=10;
-      ar {
-       name="ar";
-      [1 1 0]       };
-     };
-     Variant_Data @[4] {
-      name="wts";
-      col_flags=PIN|SAVE_DATA|AUTO_WIDTH;
-      is_matrix=1;
-      cell_geom{ 1;1;      };
-      calc_expr {
-       expr=;
-      };
-      dim_names {
-       name="dim_names";
-      [2] ;;      };
-      width=0;
       matrix_col_width=10;
       ar {
        name="ar";
@@ -16092,20 +16073,6 @@ taTransform @*(.m_transform) {scale={x=1: y=1: z=1: }: rotate={x=0: y=0: z=1: ro
 	    mat_image=0;
 	    mat_odd_vert=1;
 	   };
-	   GridColView @[4] {
-	    name="wts";
-	    m_data=.data.gp[1][0].data[4]$$;
-	    cur_font_size=12;
-	    m_transform=NULL;
-	    visible=1;
-	    text_width=8;
-	    scale_on=1;
-	    scale_min=1.056108e-38;
-	    scale_max=0;
-	    mat_layout=BOT_ZERO;
-	    mat_image=0;
-	    mat_odd_vert=1;
-	   };
 	  };
 	  main_xform {scale={x=1: y=1: z=1: }: rotate={x=0: y=0: z=1: rot=0: }: translate={x=1: y=0: z=0: }: };
 	  annotations {
@@ -17465,7 +17432,7 @@ taTransform @*(.m_transform) {scale={x=1: y=1: z=1: }: rotate={x=0: y=0: z=1: ro
  save_as_only=0;
  auto_name=1;
  last_change_desc="Project updated on wiki: CCN changes: updt to current";
- tree_state{ .;.docs;.ctrl_panels;.ctrl_panels[0];.ctrl_panels[0].mbrs;.data;.data.gp[0];.data.gp[0][2];.data.gp[1];.data.gp[1][0];.data.gp[1][3];.data.gp[2];.programs;.programs.break_points;.programs[1].args;.programs[1].functions;.programs[2];.programs[2].objs;.programs[2].objs_vars;.programs[2].types;.programs[2].args;.programs[2].vars;.programs[2].functions;.programs[2].init_code;.programs[2].prog_code;.programs[2].prog_code[0];.programs[2].prog_code[1];.programs[2].prog_code[3];.programs[2].prog_code[4];.programs[3];.programs[3].objs;.programs[3].objs_vars;.programs[3].types;.programs[3].args;.programs[3].vars;.programs[3].functions;.programs[3].init_code;.programs[3].prog_code;.programs[3].prog_code[0];.programs.gp[0];.programs.gp[0][7];.programs.gp[0][7].objs;.programs.gp[0][7].objs[0];.programs.gp[0][7].objs_vars;.programs.gp[0][7].init_code;.programs.gp[0][7].prog_code;.programs.gp[0][7].prog_code[3];.programs.gp[0][7].prog_code[3].loop_code[0];.programs.gp[1];.programs.gp[1][2];.programs.gp[1][2].vars;.programs.gp[1][2].init_code;.programs.gp[1][2].prog_code;.programs.gp[1][2].prog_code[0];.programs.gp[1][2].prog_code[6];.programs.gp[1][3];.programs.gp[1][3].prog_code;.programs.gp[1][6];.programs.gp[1][6].objs;.programs.gp[1][6].objs[0];.networks;.networks[0];.networks[0].specs;.networks[0].specs[2];.networks[0].layers;.networks[0].layers[0];.networks[0].weights; };
+ tree_state{ .;.docs;.ctrl_panels;.ctrl_panels[0].mbrs;.data;.data.gp[0];.data.gp[0][0];.data.gp[0][2];.data.gp[1];.data.gp[1][0];.data.gp[1][3];.data.gp[2];.programs;.programs.break_points;.programs[1].args;.programs[1].functions;.programs[2];.programs[2].objs;.programs[2].objs_vars;.programs[2].types;.programs[2].args;.programs[2].vars;.programs[2].functions;.programs[2].init_code;.programs[2].prog_code;.programs[2].prog_code[0];.programs[2].prog_code[1];.programs[2].prog_code[3];.programs[2].prog_code[4];.programs[3];.programs[3].objs;.programs[3].objs_vars;.programs[3].types;.programs[3].args;.programs[3].vars;.programs[3].functions;.programs[3].init_code;.programs[3].prog_code;.programs[3].prog_code[0];.programs.gp[0];.programs.gp[0][7];.programs.gp[0][7].objs;.programs.gp[0][7].objs[0];.programs.gp[0][7].objs_vars;.programs.gp[0][7].init_code;.programs.gp[0][7].prog_code;.programs.gp[0][7].prog_code[3];.programs.gp[0][7].prog_code[3].loop_code[0];.programs.gp[1];.programs.gp[1][2];.programs.gp[1][2].vars;.programs.gp[1][2].init_code;.programs.gp[1][2].prog_code;.programs.gp[1][2].prog_code[0];.programs.gp[1][2].prog_code[6];.programs.gp[1][3];.programs.gp[1][3].prog_code;.programs.gp[1][6];.programs.gp[1][6].objs;.programs.gp[1][6].objs[0];.networks;.networks[0];.networks[0].specs;.networks[0].specs[2];.networks[0].layers;.networks[0].layers[0];.networks[0].weights; };
  networks {
   name="networks";
   el_typ=LeabraNetwork;

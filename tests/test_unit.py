@@ -40,12 +40,13 @@ class UnitTestsAPI(unittest.TestCase):
         u.cycle()
         self.assertEqual(u.act, 0.5)
 
-        # is it maintained without call to add_excitatory() ?
+        # is it maintained?
         for _ in range(10):
             u.calculate_net_in()
             u.cycle()
             self.assertEqual(u.act, 0.5)
 
+        u.act_ext = None # unforcing activity
         u.add_excitatory(0.5)
         u.calculate_net_in()
         u.cycle()

@@ -103,6 +103,7 @@ class Network:
             elif self.quarter_nb == 4: # start of plus phase
                 # force activities for outputs
                 for name, activities in self._outputs.items():
+                    print(name, activities)
                     self._get_layer(name).force_activity(activities)
 
 

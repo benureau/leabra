@@ -68,13 +68,14 @@ class NetworkTestBehavior(unittest.TestCase):
 
             return network
 
-        # def compute_logs():
-        #     logs = {'wt': [], 'sse': [], 'output_act_m': []}
-        #     for t in range(50):
-        #         logs['wt'].append(conn.links[0].wt)
-        #         sse = network.trial()
-        #         logs['sse'].append(sse)
-        #         logs['output_act_m'].append(output_layer.units[0].act_m)
+        def compute_logs(network):
+            logs = {'wt': [], 'sse': [], 'output_act_m': []}
+            for t in range(50):
+                logs['wt'].append(network.connections[0].links[0].wt)
+                sse = network.trial()
+                logs['sse'].append(sse)
+                logs['output_act_m'].append(network.layers[-1].units[0].act_m)
+            return logs
 
         for inhib in [True, False]:
             suffix = '_inhib' if inhib else ''
@@ -82,8 +83,11 @@ class NetworkTestBehavior(unittest.TestCase):
             cycle_data    = data.parse_unit('neuron_pair{}_cycle.dat'.format(suffix))
 
             network = build_network(inhib)
-            check = quantitative_match(network.layers[1].units[0].logs, cycle_data,
-                                       rtol=2e-05, atol=0, check=check)
+            logs = compute_logs(network)
+            print(logs['wt'])
+            cycle_logs = network.layers[-1].units[0].logs
+            check = quantitative_match(cycle_logs, cycle_data, limit=100,
+                                       rtol=2e-05, atol=0, check=check, verbose=1)
 
         self.assertTrue(check)
 

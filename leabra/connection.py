@@ -132,7 +132,7 @@ class ConnectionSpec:
     def cycle(self, connection):
         """Transmit activity."""
         for link in connection.links:
-            if not link.post.forced:
+            if link.post.act_ext is None: # activity not forced
                 scaled_act = self.wt_scale_abs * connection.wt_scale * link.wt * link.pre.act
                 link.post.add_excitatory(scaled_act)
 

@@ -39,7 +39,6 @@ class Unit:
     def reset(self):
         """Reset the Unit state. Called at creation, and at every trial."""
         self.ex_inputs  = []    # excitatory inputs for the next cycle
-        self.forced     = False # Is activity directly set?
 
         self.g_e     = 0                  # excitatory conductance
         self.I_net   = 0                  # net current
@@ -47,6 +46,7 @@ class Unit:
         self.v_m     = self.spec.v_m_init # membrane potential
         self.v_m_eq  = self.v_m           # equilibrium membrane potential
                                           # (not reseted after a spike)
+        self.act_ext = None               # externally forced activity (None for not forced)
         self.act     = 0                  # current activity
         self.act_nd  = self.act           # non-depressed activity # FIXME: not implemented yet
         self.act_m   = self.act           # activity at the end of the minus phase
@@ -71,7 +71,7 @@ class Unit:
         """Excitatory conductance."""
         return self.spec.g_bar_e * self.g_e
 
-    def force_activity(self, act):
+    def force_activity(self, act_ext):
         """Force the activity of a unit.
 
         The activity of the unit will remain at that value for subsequent cycles,
@@ -79,14 +79,16 @@ class Unit:
         `add_excitatory()` is called, which will resume updating `I_net` and
         `v_m` and compute `act` based on those.
         """
-        self.forced = True
         assert len(self.ex_inputs) == 0  # avoiding mistakes
-        self.act    = act  # FIXME: should the activity be delayed until the start of the next cycle?
-        self.act_nd = act
+        self.act_ext = act_ext # forced activity
+        self.spec.force_activity(self)
+
+        # self.act    = act  # FIXME: should the activity be delayed until the start of the next cycle?
+        # self.act_nd = act
+
 
     def add_excitatory(self, inp_act):
         """Add an input for the next cycle."""
-        self.forced = False
         self.ex_inputs.append(inp_act)
 
     def update_avg_l(self):
@@ -235,10 +237,14 @@ class UnitSpec:
 
 
     def calculate_net_in(self, unit, dt_integ=1):
-        """Calculate the net input for the unit. To execute before cycle()"""
-        if unit.forced:
-            assert len(unit.ex_inputs) == 0  # catching mistakes
-            return # done!
+        """Calculate the net input for the unit. To execute before cycle().
+
+        If the activity of the unit is forced, then normal external inputs are ignored, and
+        net_in is set to the forced activity.
+        """
+        if unit.act_ext is not None:  # forced activity
+            assert len(unit.ex_inputs) == 0  # avoiding mistakes
+            return # see self.force_activity
 
         net_raw = 0.0
         if len(unit.ex_inputs) > 0:
@@ -250,6 +256,25 @@ class UnitSpec:
         unit.g_e += dt_integ * self.dt_net * (net_raw - unit.g_e)  # eq 2.16
 
 
+    def force_activity(self, unit):
+        """Replace calls to `calculate_net_in` and `cycle` for forced activity units.
+
+        Note that this is computed immediately when forcing a unit's activity, and in particular
+        before cycling connections.
+        """
+        # calculate_netin
+        unit.g_e = unit.act_ext / self.g_bar_e  # unit.net == unit.act
+        # cycle
+        unit.I_net = 0.0
+        unit.act    = unit.act_ext
+        unit.act_nd = unit.act_ext
+        if unit.act == 0:
+            unit.v_m = self.e_rev_l
+        else:
+            unit.v_m = self.act_thr + unit.act_ext / self.act_gain;
+        unit.v_m_eq = unit.v_m
+
+
     def cycle(self, unit, g_i=0.0, dt_integ=1):
         """Update activity
 
@@ -257,11 +282,10 @@ class UnitSpec:
         g_i     :  inhibitory input
         dt_integ:  integration time step, in ms.
         """
-
-        if unit.forced:
+        if unit.act_ext is not None: # forced activity
             self.update_avgs(unit, dt_integ)
             unit.update_logs()
-            return # done!
+            return # see self.force_activity
 
         # computing I_net and I_net_r
         unit.I_net   = self.integrate_I_net(unit, g_i, dt_integ, ratecoded=False, steps=2) # half-step integration
