@@ -33,7 +33,6 @@ class Unit:
         self.avg_s     = self.spec.avg_init # short-term average
         self.avg_m     = self.spec.avg_init # medium-term average
         self.avg_l     = self.spec.avg_l_init
-        self.avg_l_lrn = 1.0  # FIXME: why 1.0?
         self.avg_s_eff = 0.0  # linear mixing of avg_s and avg_m
 
     def reset(self):
@@ -58,6 +57,10 @@ class Unit:
     def act_eq(self):
         """For rate-coded units, `act` == `act_eq`. This Unit implementation is only rate-coded."""
         return self.act
+
+    @property
+    def avg_l_lrn(self):
+        return self.spec.avg_l_lrn(self)
 
     def cycle(self, g_i=0.0, dt_integ=1):
         """Cycle the unit"""
@@ -125,6 +128,7 @@ class UnitSpec:
 
     """
 
+
     def __init__(self, **kwargs):
         # time step constants
         self.tau_net    = 1.4     # net input integration time constant (net = g_e * g_bar_e)
@@ -168,12 +172,18 @@ class UnitSpec:
         self.avg_l_min  = 0.2
         self.avg_l_gain = 2.5
         self.avg_m_in_s = 0.1
+        self.avg_lrn_min = 0.0001 # minimum avg_l_lrn value.
+        self.avg_lrn_max = 0.5    # maximum avg_l_lrn value
 
         for key, value in kwargs.items():
             assert hasattr(self, key), 'the {} parameter does not exist'.format(key)
             setattr(self, key, value)
 
         self._nxx1_conv = None # precomputed convolution for the noisy xx1 function
+
+    def avg_l_lrn(self, unit):
+        avg_fact = (self.avg_lrn_max - self.avg_lrn_min)/(self.avg_l_gain - self.avg_l_min)
+        return self.avg_lrn_min + avg_fact * (unit.avg_l - self.avg_l_min)
 
     @property
     def dt_net(self):
