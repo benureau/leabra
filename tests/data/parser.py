@@ -9,22 +9,22 @@ unit_fmt = {'cycle': int, 'net': float, 'I_net': float,
             'avg_ss': float, 'avg_s': float, 'avg_m': float, 'avg_s_eff': float, 'avg_l': float}
 unit_trans = {'vm_eq': 'v_m_eq'}
 
-def parse_unit(filename):
-    return parse_file(filename, unit_fmt, trans=unit_trans)
+def parse_unit(filename, flat=False):
+    return parse_file(filename, unit_fmt, trans=unit_trans, flat=flat)
 
 weights_fmt = {'trial_name': str, 'sse': float, 'Input_act_m': float, 'Output_act_m': float, 'wts': float}
 weights_trans = {'Input_act_m': 'input_act_m', 'Output_act_m': 'output_act_m', 'wts':'wt'}
 
-def parse_weights(filename):
+def parse_weights(filename, flat=False):
     """Parse weight matrix with only one element"""
-    return parse_file(filename, weights_fmt, trans=weights_trans)
+    return parse_file(filename, weights_fmt, trans=weights_trans, flat=flat)
 
 
-def parse_xy(filename):
-    return parse_file(filename, {'x': float, 'y': float})
+def parse_xy(filename, flat=False):
+    return parse_file(filename, {'x': float, 'y': float}, flat=flat)
 
 
-def parse_file(filename, fmt, trans=None):
+def parse_file(filename, fmt, trans=None, flat=False):
     """Return the data file as a dict
 
     `vm_eq` is renamed in `v_m_eq`.
@@ -96,7 +96,23 @@ def parse_file(filename, fmt, trans=None):
             if name in trans:
                 data[trans[name]] = data.pop(name)
 
+    if flat:
+        # flatten if only one value
+        for values in data.values():
+            for i, v in enumerate(values):
+                values[i] = flatten_list(v)
+
     return data
+
+def flatten_list(v):
+    try:
+        if len(v) == 1:
+            return flatten_list(v[0])
+        else:
+            return v
+    except (KeyError, TypeError):
+        return v
+
 
 if __name__ == '__main__':
     print(parse_file('neuron.txt'))
