@@ -71,7 +71,7 @@ class NetworkTestBehavior(unittest.TestCase):
             for unit in input_layer.units:
                 unit.log_names = log_names
                 unit.logs      = {name: [] for name in unit.log_names}
-            output_spec  = leabra.LayerSpec(lay_inhib=inhib, g_i=1.5, ff=0.0, fb=0.5, fb_dt=1/1.4, ff0=0.1) #FIXME fb_tau
+            output_spec  = leabra.LayerSpec(lay_inhib=inhib, g_i=1.8, ff=1.0, fb=1.0, fb_dt=1/1.4, ff0=0.1) #FIXME fb_tau
             output_layer = leabra.Layer(1, spec=output_spec, unit_spec=u_spec,
                                            genre=leabra.OUTPUT, name='output_layer')
             for unit in output_layer.units:
@@ -107,127 +107,127 @@ class NetworkTestBehavior(unittest.TestCase):
             cycle_logs = network.layers[-1].units[0].logs
             cycle_logs['gc_i'] = network.layers[-1].logs['gc_i']
             check = quantitative_match(cycle_logs, cycle_data, limit=-1,
-                                       rtol=2e-05, atol=0, check=check, verbose=1)
+                                       rtol=2e-05, atol=1e-08, check=check, verbose=1)
             check = quantitative_match(trial_logs, trial_data,
-                                       rtol=5e-05, atol=0, check=check, verbose=1)
+                                       rtol=2e-05, atol=0, check=check, verbose=1)
 
         self.assertTrue(check)
 
-
-    def test_netin_scaling(self):
-        """Quantitative test on the netin scaling scenario"""
-        cycle_data = data.parse_unit('netin.dat')
-
-        def build_network():
-            u_spec = leabra.UnitSpec(act_thr=0.5, act_gain=100, act_sd=0.005,
-                                     g_bar_e=1.0, g_bar_l=0.1, g_bar_i=1.0,
-                                     e_rev_e=1.0, e_rev_l=0.3, e_rev_i=0.25,
-                                     avg_l_min=0.2, avg_l_init=0.4, avg_l_gain=2.5,
-                                     adapt_on=False)
-            # layers
-            input0_layer  = leabra.Layer(4, unit_spec=u_spec, name='input0_layer')
-            input1_layer  = leabra.Layer(4, unit_spec=u_spec, name='input1_layer')
-            output_spec  = leabra.LayerSpec(lay_inhib=False)
-            output_layer = leabra.Layer(4, spec=output_spec, unit_spec=u_spec, name='output_layer')
-            # connections
-            conn_spec0 = leabra.ConnectionSpec(proj='1to1', lrule=None, rnd_mean=0.5, rnd_var=0.0,
-                                               wt_scale_abs=1.0, wt_scale_rel=1.0)
-            conn_spec1 = leabra.ConnectionSpec(proj='1to1', lrule=None, rnd_mean=0.5, rnd_var=0.0,
-                                               wt_scale_abs=2.0, wt_scale_rel=1.0)
-            conn0 = leabra.Connection(input0_layer, output_layer, spec=conn_spec0)
-            conn1 = leabra.Connection(input1_layer, output_layer, spec=conn_spec1)
-            # network
-            network = leabra.Network(layers=[input0_layer, input1_layer, output_layer],
-                                     connections=[conn0, conn1])
-            network.set_inputs({'input0_layer': [0.5, 0.95, 0.0, 0.25],
-                                'input1_layer': [0.0, 0.5, 0.95, 0.75]})
-            return network
-
-        def compute_logs(network):
-            logs = {'net': [], 'act': []}
-            output_layer = network.layers[2]
-            for t in range(200):
-                network.cycle()
-                logs['net'].append(np.array([u.net for u in output_layer.units]))
-                logs['act'].append(np.array([u.act for u in output_layer.units]))
-            return logs
-
-        network = build_network()
-        logs = compute_logs(network)
-
-        self.assertTrue(quantitative_match(logs, cycle_data, rtol=2e-05, atol=0))
-    
-
-    def test_std_project(self):
-        """Quantitative test on the template Leabra project"""
-
-        def build_network(n):
-            u_spec = leabra.UnitSpec(act_thr=0.5, act_gain=100, act_sd=0.005,
-                                     g_bar_e=1.0, g_bar_l=0.1, g_bar_i=1.0,
-                                     e_rev_e=1.0, e_rev_l=0.3, e_rev_i=0.25,
-                                     avg_l_min=0.2, avg_l_init=0.4, avg_l_gain=2.5,
-                                     adapt_on=False)
-
-            # layers
-            layer_spec = leabra.LayerSpec(lay_inhib=False)
-            input_layer  = leabra.Layer(n, spec=layer_spec, unit_spec=u_spec, genre=leabra.INPUT, name='input_layer')
-            hidden_layer = leabra.Layer(n, spec=layer_spec, unit_spec=u_spec, genre=leabra.HIDDEN, name='hidden_layer')
-            output_layer = leabra.Layer(n, spec=layer_spec, unit_spec=u_spec, genre=leabra.OUTPUT, name='output_layer')
-
-            # connections
-            weights = read_weights(os.path.join(os.path.dirname(__file__), 'emergent_projects/leabra_std{}.wts'.format(n)))
-            inphid_conn_spec = leabra.ConnectionSpec(proj='full', lrule=None, rnd_mean=0.5, rnd_var=0.0,
-                                                     wt_scale_abs=1.0, wt_scale_rel=1.0)
-            hidout_conn_spec = leabra.ConnectionSpec(proj='full', lrule=None, rnd_mean=0.5, rnd_var=0.0,
-                                                     wt_scale_abs=1.0, wt_scale_rel=1.0)
-            inphid_conn = leabra.Connection(input_layer,  hidden_layer, spec=inphid_conn_spec)
-            inphid_conn.weights = weights[('Input', 'Hidden')]
-            hidout_conn = leabra.Connection(hidden_layer, output_layer, spec=hidout_conn_spec)
-            hidout_conn.weights = weights[('Hidden', 'Output')]
-
-            # network
-            network = leabra.Network(layers=[input_layer, hidden_layer, output_layer],
-                                     connections=[inphid_conn, hidout_conn])
-            n_sqrt = int(round(np.sqrt(n)))
-            network.set_inputs ({'input_layer' : [0.95]*n_sqrt + [0.0]*(n-n_sqrt)})
-            network.set_outputs({'output_layer': [0.0]*(n-n_sqrt) + [0.95]*n_sqrt}) # FIXME 0.95 -> 1.0
-
-            return network
-
-        def compute_logs(network):
-            hidden_logs = {'net': [], 'act': [], 'I_net': [], 'v_m': []}
-            output_logs = {'net': [], 'act': [], 'I_net': [], 'v_m': []}
-            hidden_layer = network.layers[1]
-            output_layer = network.layers[2]
-            for t in range(200):
-                network.cycle()
-                for logs, layer in [(hidden_logs, hidden_layer), (output_logs, output_layer)]:
-                    logs['net'].append(np.array(  [u.net   for u in layer.units]))
-                    logs['act'].append(np.array(  [u.act   for u in layer.units]))
-                    logs['I_net'].append(np.array([u.I_net for u in layer.units]))
-                    logs['v_m'].append(np.array(  [u.v_m   for u in layer.units]))
-            return hidden_logs, output_logs
-
-
-
-        check = True
-        for n in [4]:
-            cycle_output_data = data.parse_unit('leabra_std{}_cycle_output.dat'.format(n))
-            cycle_hidden_data = data.parse_unit('leabra_std{}_cycle_hidden.dat'.format(n))
-            network = build_network(n)
-
-            hidden_logs, output_logs = compute_logs(network)
-            print([u.act_m for u in network.layers[2].units])
-            for title, logs, em_data in [('hidden', hidden_logs, cycle_hidden_data),
-                                         ('output', output_logs, cycle_output_data)]:
-                for name in logs.keys():
-                    for t, (py, em) in enumerate(list(zip(logs[name], em_data[name]))[:-1]):
-                        py = py[:4]
-                        if not np.allclose(py, em, rtol=2e-05, atol=0):
-                            print('{} {}:{:2d} [py] {} != {} [em] diff={} (n={})'.format(
-                                   title, name, t,      py,  em,        py-em,   n))
-                            check = False
-        self.assertTrue(check)
+    #
+    # def test_netin_scaling(self):
+    #     """Quantitative test on the netin scaling scenario"""
+    #     cycle_data = data.parse_unit('netin.dat')
+    #
+    #     def build_network():
+    #         u_spec = leabra.UnitSpec(act_thr=0.5, act_gain=100, act_sd=0.005,
+    #                                  g_bar_e=1.0, g_bar_l=0.1, g_bar_i=1.0,
+    #                                  e_rev_e=1.0, e_rev_l=0.3, e_rev_i=0.25,
+    #                                  avg_l_min=0.2, avg_l_init=0.4, avg_l_gain=2.5,
+    #                                  adapt_on=False)
+    #         # layers
+    #         input0_layer  = leabra.Layer(4, unit_spec=u_spec, name='input0_layer')
+    #         input1_layer  = leabra.Layer(4, unit_spec=u_spec, name='input1_layer')
+    #         output_spec  = leabra.LayerSpec(lay_inhib=False)
+    #         output_layer = leabra.Layer(4, spec=output_spec, unit_spec=u_spec, name='output_layer')
+    #         # connections
+    #         conn_spec0 = leabra.ConnectionSpec(proj='1to1', lrule=None, rnd_mean=0.5, rnd_var=0.0,
+    #                                            wt_scale_abs=1.0, wt_scale_rel=1.0)
+    #         conn_spec1 = leabra.ConnectionSpec(proj='1to1', lrule=None, rnd_mean=0.5, rnd_var=0.0,
+    #                                            wt_scale_abs=2.0, wt_scale_rel=1.0)
+    #         conn0 = leabra.Connection(input0_layer, output_layer, spec=conn_spec0)
+    #         conn1 = leabra.Connection(input1_layer, output_layer, spec=conn_spec1)
+    #         # network
+    #         network = leabra.Network(layers=[input0_layer, input1_layer, output_layer],
+    #                                  connections=[conn0, conn1])
+    #         network.set_inputs({'input0_layer': [0.5, 0.95, 0.0, 0.25],
+    #                             'input1_layer': [0.0, 0.5, 0.95, 0.75]})
+    #         return network
+    #
+    #     def compute_logs(network):
+    #         logs = {'net': [], 'act': []}
+    #         output_layer = network.layers[2]
+    #         for t in range(200):
+    #             network.cycle()
+    #             logs['net'].append(np.array([u.net for u in output_layer.units]))
+    #             logs['act'].append(np.array([u.act for u in output_layer.units]))
+    #         return logs
+    #
+    #     network = build_network()
+    #     logs = compute_logs(network)
+    #
+    #     self.assertTrue(quantitative_match(logs, cycle_data, rtol=2e-05, atol=0))
+    #
+    #
+    # def test_std_project(self):
+    #     """Quantitative test on the template Leabra project"""
+    #
+    #     def build_network(n):
+    #         u_spec = leabra.UnitSpec(act_thr=0.5, act_gain=100, act_sd=0.005,
+    #                                  g_bar_e=1.0, g_bar_l=0.1, g_bar_i=1.0,
+    #                                  e_rev_e=1.0, e_rev_l=0.3, e_rev_i=0.25,
+    #                                  avg_l_min=0.2, avg_l_init=0.4, avg_l_gain=2.5,
+    #                                  adapt_on=False)
+    #
+    #         # layers
+    #         layer_spec = leabra.LayerSpec(lay_inhib=False)
+    #         input_layer  = leabra.Layer(n, spec=layer_spec, unit_spec=u_spec, genre=leabra.INPUT, name='input_layer')
+    #         hidden_layer = leabra.Layer(n, spec=layer_spec, unit_spec=u_spec, genre=leabra.HIDDEN, name='hidden_layer')
+    #         output_layer = leabra.Layer(n, spec=layer_spec, unit_spec=u_spec, genre=leabra.OUTPUT, name='output_layer')
+    #
+    #         # connections
+    #         weights = read_weights(os.path.join(os.path.dirname(__file__), 'emergent_projects/leabra_std{}.wts'.format(n)))
+    #         inphid_conn_spec = leabra.ConnectionSpec(proj='full', lrule=None, rnd_mean=0.5, rnd_var=0.0,
+    #                                                  wt_scale_abs=1.0, wt_scale_rel=1.0)
+    #         hidout_conn_spec = leabra.ConnectionSpec(proj='full', lrule=None, rnd_mean=0.5, rnd_var=0.0,
+    #                                                  wt_scale_abs=1.0, wt_scale_rel=1.0)
+    #         inphid_conn = leabra.Connection(input_layer,  hidden_layer, spec=inphid_conn_spec)
+    #         inphid_conn.weights = weights[('Input', 'Hidden')]
+    #         hidout_conn = leabra.Connection(hidden_layer, output_layer, spec=hidout_conn_spec)
+    #         hidout_conn.weights = weights[('Hidden', 'Output')]
+    #
+    #         # network
+    #         network = leabra.Network(layers=[input_layer, hidden_layer, output_layer],
+    #                                  connections=[inphid_conn, hidout_conn])
+    #         n_sqrt = int(round(np.sqrt(n)))
+    #         network.set_inputs ({'input_layer' : [0.95]*n_sqrt + [0.0]*(n-n_sqrt)})
+    #         network.set_outputs({'output_layer': [0.0]*(n-n_sqrt) + [0.95]*n_sqrt}) # FIXME 0.95 -> 1.0
+    #
+    #         return network
+    #
+    #     def compute_logs(network):
+    #         hidden_logs = {'net': [], 'act': [], 'I_net': [], 'v_m': []}
+    #         output_logs = {'net': [], 'act': [], 'I_net': [], 'v_m': []}
+    #         hidden_layer = network.layers[1]
+    #         output_layer = network.layers[2]
+    #         for t in range(200):
+    #             network.cycle()
+    #             for logs, layer in [(hidden_logs, hidden_layer), (output_logs, output_layer)]:
+    #                 logs['net'].append(np.array(  [u.net   for u in layer.units]))
+    #                 logs['act'].append(np.array(  [u.act   for u in layer.units]))
+    #                 logs['I_net'].append(np.array([u.I_net for u in layer.units]))
+    #                 logs['v_m'].append(np.array(  [u.v_m   for u in layer.units]))
+    #         return hidden_logs, output_logs
+    #
+    #
+    #
+    #     check = True
+    #     for n in [4]:
+    #         cycle_output_data = data.parse_unit('leabra_std{}_cycle_output.dat'.format(n))
+    #         cycle_hidden_data = data.parse_unit('leabra_std{}_cycle_hidden.dat'.format(n))
+    #         network = build_network(n)
+    #
+    #         hidden_logs, output_logs = compute_logs(network)
+    #         print([u.act_m for u in network.layers[2].units])
+    #         for title, logs, em_data in [('hidden', hidden_logs, cycle_hidden_data),
+    #                                      ('output', output_logs, cycle_output_data)]:
+    #             for name in logs.keys():
+    #                 for t, (py, em) in enumerate(list(zip(logs[name], em_data[name]))[:-1]):
+    #                     py = py[:4]
+    #                     if not np.allclose(py, em, rtol=2e-05, atol=0):
+    #                         print('{} {}:{:2d} [py] {} != {} [em] diff={} (n={})'.format(
+    #                                title, name, t,      py,  em,        py-em,   n))
+    #                         check = False
+    #     self.assertTrue(check)
 
 
 if __name__ == '__main__':
