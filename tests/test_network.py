@@ -46,15 +46,27 @@ class NetworkTestBehavior(unittest.TestCase):
         """Quantitative test on the pair of neurons scenario"""
         check = True
 
-        def build_network(inhib):
-            u_spec = leabra.UnitSpec(act_thr=0.5, act_gain=100, act_sd=0.005,
-                                     g_bar_e=1.0, g_bar_i=1.0, g_bar_l=0.1,
-                                     e_rev_e=1.0, e_rev_i=0.25, e_rev_l=0.3,
-                                     avg_l_min=0.2, avg_l_init=0.4, avg_l_gain=2.5,
-                                     adapt_on=False)
+        def build_network(inhib, fixed_lrn_factor=None):
+
+            if fixed_lrn_factor is not None:
+
+                class UnitSpecFixedLrnFactor(leabra.UnitSpec):
+
+                    def avg_l_lrn(self, unit):
+                        return fixed_lrn_factor
+
+                unitspec_class = UnitSpecFixedLrnFactor
+            else:
+                unitspec_class = leabra.UnitSpec
+
+            u_spec = unitspec_class(act_thr=0.5, act_gain=100, act_sd=0.005,
+                                    g_bar_e=1.0, g_bar_i=1.0, g_bar_l=0.1,
+                                    e_rev_e=1.0, e_rev_i=0.25, e_rev_l=0.3,
+                                    avg_l_min=0.2, avg_l_init=0.4, avg_l_gain=2.5,
+                                    adapt_on=False)
             input_layer  = leabra.Layer(1, unit_spec=u_spec, name='input_layer')
             g_i = 1.5 if inhib else 0.0
-            output_spec  = leabra.LayerSpec(g_i=g_i, ff=0.0, fb=0.5, fb_dt=1/1.4, ff0=0.1)
+            output_spec  = leabra.LayerSpec(g_i=g_i, ff=0.0, fb=0.5, fb_dt=1/1.4, ff0=0.1) #FIXME fb_tau
             output_layer = leabra.Layer(1, spec=output_spec, unit_spec=u_spec, name='output_layer')
             conspec = leabra.ConnectionSpec(proj='full', lrule='leabra', lrate=0.04,
                                             m_lrn=1.0, rnd_mean=0.5, rnd_var=0.0)
@@ -80,14 +92,14 @@ class NetworkTestBehavior(unittest.TestCase):
             trial_data = data.parse_weights('neuron_pair{}.dat'.format(suffix), flat=True)
             cycle_data = data.parse_unit('neuron_pair{}_cycle.dat'.format(suffix))
 
-            network = build_network(inhib)
+            network = build_network(inhib, fixed_lrn_factor=0.0)
             trial_logs = compute_logs(network)
             #print(logs['wt'])
             cycle_logs = network.layers[-1].units[0].logs
-            # check = quantitative_match(cycle_logs, cycle_data, limit=-1,
-            #                            rtol=2e-05, atol=0, check=check, verbose=2)
+            check = quantitative_match(cycle_logs, cycle_data, limit=-1,
+                                       rtol=2e-05, atol=0, check=check, verbose=1)
             check = quantitative_match(trial_logs, trial_data,
-                                       rtol=2e-05, atol=0, check=check, verbose=2)
+                                       rtol=2e-05, atol=0, check=check, verbose=1)
 
         self.assertTrue(check)
     #

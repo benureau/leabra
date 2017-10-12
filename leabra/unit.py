@@ -167,8 +167,8 @@ class UnitSpec:
         self.avg_ss_dt  = 0.5
         self.avg_s_dt   = 0.5
         self.avg_m_dt   = 0.1
-        self.avg_l_dt   = 0.1 # computed once every trial
-        self.avg_l_init = 0.40
+        self.avg_l_dt   = 0.1 # computed once every trial #FIXME tau
+        self.avg_l_init = 0.4
         self.avg_l_min  = 0.2
         self.avg_l_gain = 2.5
         self.avg_m_in_s = 0.1

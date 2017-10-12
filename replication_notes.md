@@ -14,3 +14,5 @@ instant produce significantly different asymptotes.
 ## Code correspondance
 
 * Hard clamping behavior (forcing activities) is found in `LeabraUnitSpec::Compute_HardClamp()`.
+* `Connection.learning_rule()` and `Connection.apply_dwt()` from `LeabraConSpec::C_Compute_Weights_CtLeabraXCAL()`.
+* `Unit.avg_l_lrn` from `LeabraUnitSpec::GetLrn()`

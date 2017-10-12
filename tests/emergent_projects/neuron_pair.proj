@@ -106,11 +106,12 @@ LeabraProject .projects[0] {
   };
   DataTable_Group @.gp[1] = [4] { 
    DataTable @[0] { 
-    DataTableCols @.data = [4] {
+    DataTableCols @.data = [5] {
      String_Data @[0] { };
      float_Data @[1] { };
      float_Data @[2] { };
      float_Data @[3] { };
+     Variant_Data @[4] { };
     };
 
     DataOpList @.last_sort_spec.ops = [0] {
@@ -800,7 +801,7 @@ LeabraProject .projects[0] {
       };
      };
      NetDataLoop @[7] { 
-      ProgEl_List @.loop_code = [2] {
+      ProgEl_List @.loop_code = [3] {
        ProgramCall @[0] { 
 	ProgArg_List @.prog_args = [2] {
 	 ProgArg @[0] { };
@@ -810,6 +811,11 @@ LeabraProject .projects[0] {
        If @[1] { 
 	ProgEl_List @.true_code = [1] {
 	 StopStepPoint @[0] { };
+	};
+       };
+       ProgramCall @[2] { 
+	ProgArg_List @.prog_args = [1] {
+	 ProgArg @[0] { };
 	};
        };
       };
@@ -867,7 +873,7 @@ LeabraProject .projects[0] {
     ProgEl_List @.init_code = [0] {
     };
 
-    ProgEl_List @.prog_code = [10] {
+    ProgEl_List @.prog_code = [9] {
      LocalVars @[0] { 
       ProgVar_List @.local_vars = [1] {
        ProgVar @[0] { };
@@ -910,12 +916,7 @@ LeabraProject .projects[0] {
       ProgArg_List @.meth_args = [0] {
       };
      };
-     ProgramCall @[8] { 
-      ProgArg_List @.prog_args = [1] {
-       ProgArg @[0] { };
-      };
-     };
-     NetUpdateView @[9] { };
+     NetUpdateView @[8] { };
     };
    };
    Program @[4] { 
@@ -937,9 +938,11 @@ LeabraProject .projects[0] {
      ProgVar @[1] { };
     };
 
-    ProgVar_List @.vars = [2] {
+    ProgVar_List @.vars = [4] {
      ProgVar @[0] { };
      ProgVar @[1] { };
+     ProgVar @[2] { };
+     ProgVar @[3] { };
     };
 
     Function_List @.functions = [0] {
@@ -949,7 +952,7 @@ LeabraProject .projects[0] {
      NetCounterInit @[0] { };
     };
 
-    ProgEl_List @.prog_code = [10] {
+    ProgEl_List @.prog_code = [11] {
      LocalVars @[0] { 
       ProgVar_List @.local_vars = [2] {
        ProgVar @[0] { };
@@ -982,23 +985,28 @@ LeabraProject .projects[0] {
 	 ProgArg @[0] { };
 	};
        };
-       ProgramCall @[1] { 
-	ProgArg_List @.prog_args = [1] {
-	 ProgArg @[0] { };
+       AssignExpr @[1] { };
+       If @[2] { 
+	ProgEl_List @.true_code = [1] {
+	 ProgramCall @[0] { 
+	  ProgArg_List @.prog_args = [1] {
+	   ProgArg @[0] { };
+	  };
+	 };
 	};
        };
-       AssignExpr @[2] { };
       };
      };
      MethodCall @[7] { 
       ProgArg_List @.meth_args = [0] {
       };
      };
-     MethodCall @[8] { 
+     AssignExpr @[8] { };
+     MethodCall @[9] { 
       ProgArg_List @.meth_args = [0] {
       };
      };
-     NetUpdateView @[9] { };
+     NetUpdateView @[10] { };
     };
    };
    Program @[5] { 
@@ -2205,11 +2213,12 @@ LeabraProject .projects[0] {
       T3Panel @[4] { 
        T3DataView_List @.root_view.children = [1] {
 	GridTableView @[0] { 
-	 T3DataView_List @.children = [4] {
+	 T3DataView_List @.children = [5] {
 	  GridColView @[0] { };
 	  GridColView @[1] { };
 	  GridColView @[2] { };
 	  GridColView @[3] { };
+	  GridColView @[4] { };
 	 };
 
 	 T3Annotation_List @.annotations = [0] {
@@ -3507,6 +3516,23 @@ Updated to 8.0 specs and programs.  No major changes -- way that Hebbian vs. Err
        name="dim_names";
       [2] ;;      };
       width=12;
+      matrix_col_width=10;
+      ar {
+       name="ar";
+      [1 1 0]       };
+     };
+     Variant_Data @[4] {
+      name="wts";
+      col_flags=PIN|SAVE_DATA|AUTO_WIDTH;
+      is_matrix=1;
+      cell_geom{ 1;1;      };
+      calc_expr {
+       expr=;
+      };
+      dim_names {
+       name="dim_names";
+      [2] ;;      };
+      width=0;
       matrix_col_width=10;
       ar {
        name="ar";
@@ -5790,7 +5816,7 @@ Updated to 8.0 specs and programs.  No major changes -- way that Hebbian vs. Err
      };
      RndSeed @[1] {
       name="rnd_seed";
-      rnd_seed=820307768;
+      rnd_seed=913807150;
      };
     };
     objs_vars {
@@ -6798,7 +6824,7 @@ Updated to 8.0 specs and programs.  No major changes -- way that Hebbian vs. Err
       meth_desc=" record the current time as the ending time, and compute difference as the time used";
      };
     };
-    step_prog=.programs.gp[0][5]$$;
+    step_prog=.programs.gp[0][3]$$;
     step_n=1;
     doc {
      name="doc";
@@ -7314,7 +7340,7 @@ mw.config.set({\"wgBackendResponseTime\":155});
 	  };
 	 };
 	};
-	target=.programs.gp[0][3]$$;
+	target=$.programs.gp[0][3]$;
 	targ_ld_init="*LeabraTrial*";
        };
        If @[1] {
@@ -7339,6 +7365,30 @@ mw.config.set({\"wgBackendResponseTime\":155});
 	  };
 	 };
 	};
+       };
+       ProgramCall @[2] {
+	name="ProgramCall_LeabraTrialMonitornetwork";
+	desc="records data about the trial-level processing to a datatable for graphing/processing";
+	flags=CAN_REVERT_TO_CODE;
+	code_string="LeabraTrialMonitor(network)";
+	prog_args {
+	 name="prog_args";
+	 el_typ=ProgArg;
+	 el_def=0;
+	 ProgArg @[0] {
+	  arg_type=Network;
+	  type="LeabraNetwork*";
+	  name="network";
+	  required=1;
+	  def_val=;
+	  prev_expr=;
+	  expr {
+	   expr="network";
+	  };
+	 };
+	};
+	target=.programs.gp[0][7]$$;
+	targ_ld_init="*LeabraTrialMonitor*";
        };
       };
       data_var=.programs.gp[0][2].args[1]$$;
@@ -7757,31 +7807,7 @@ this program can be extended to do arbitrary things to generate data and apply i
       meth_sig="void Trial_Final()";
       meth_desc=" do final processing after trial: Compute_AbsRelNetin";
      };
-     ProgramCall @[8] {
-      name="ProgramCall_LeabraTrialMonitornetwork";
-      desc="records data about the trial-level processing to a datatable for graphing/processing";
-      flags=CAN_REVERT_TO_CODE;
-      code_string="LeabraTrialMonitor(network)";
-      prog_args {
-       name="prog_args";
-       el_typ=ProgArg;
-       el_def=0;
-       ProgArg @[0] {
-	arg_type=Network;
-	type="LeabraNetwork*";
-	name="network";
-	required=1;
-	def_val=;
-	prev_expr=;
-	expr {
-	 expr="network";
-	};
-       };
-      };
-      target=.programs.gp[0][7]$$;
-      targ_ld_init="*LeabraTrialMonitor*";
-     };
-     NetUpdateView @[9] {
+     NetUpdateView @[8] {
       name="NetUpdateView_NetUpdateView";
       desc="update the network view(s) (only if update_net_view is true)";
       flags=CAN_REVERT_TO_CODE;
@@ -7892,6 +7918,26 @@ this program can be extended to do arbitrary things to generate data and apply i
       flags=CTRL_PANEL|NULL_CHECK|SAVE_VAL|USED|EDIT_VAL;
       reference=0;
       desc="if true, will update network views at end of settling";
+      init_from=NULL;
+     };
+     ProgVar @[2] {
+      name="quarter";
+      var_type=T_Int;
+      int_val=0;
+      object_scope=NULL;
+      flags=CTRL_PANEL|NULL_CHECK|SAVE_VAL|USED|EDIT_VAL;
+      reference=0;
+      desc=;
+      init_from=NULL;
+     };
+     ProgVar @[3] {
+      name="trial";
+      var_type=T_Int;
+      int_val=0;
+      object_scope=NULL;
+      flags=CTRL_PANEL|CTRL_READ_ONLY|NULL_CHECK|SAVE_VAL|EDIT_VAL;
+      reference=0;
+      desc="current trial (event) within the epoch -- increments automatically";
       init_from=NULL;
      };
     };
@@ -8070,34 +8116,10 @@ this program can be extended to do arbitrary things to generate data and apply i
 	  };
 	 };
 	};
-	target=$.programs.gp[0][5]$;
+	target=.programs.gp[0][5]$$;
 	targ_ld_init="*LeabraCycle*";
        };
-       ProgramCall @[1] {
-	name="ProgramCall_LeabraCycleMonitornetwork";
-	desc=;
-	flags=CAN_REVERT_TO_CODE;
-	code_string="LeabraCycleMonitor(network)";
-	prog_args {
-	 name="prog_args";
-	 el_typ=ProgArg;
-	 el_def=0;
-	 ProgArg @[0] {
-	  arg_type=Network;
-	  type="LeabraNetwork*";
-	  name="network";
-	  required=1;
-	  def_val=;
-	  prev_expr=;
-	  expr {
-	   expr="network";
-	  };
-	 };
-	};
-	target=.programs.gp[0][10]$$;
-	targ_ld_init="*LeabraCycleMonitor*";
-       };
-       AssignExpr @[2] {
+       AssignExpr @[1] {
 	name="AssignExpr_cyclenetworkcycle";
 	desc="grab the updated cycle count";
 	flags=CAN_REVERT_TO_CODE;
@@ -8105,6 +8127,44 @@ this program can be extended to do arbitrary things to generate data and apply i
 	result_var=$.programs.gp[0][4].vars[0]$;
 	expr {
 	 expr="network.cycle";
+	};
+       };
+       If @[2] {
+	name="If_ifquarter12";
+	desc=;
+	flags=CAN_REVERT_TO_CODE;
+	code_string="if (quarter < 12)";
+	cond {
+	 expr="quarter < 12";
+	};
+	true_code {
+	 name="true_code";
+	 el_typ=ProgCode;
+	 el_def=0;
+	 ProgramCall @[0] {
+	  name="ProgramCall_LeabraCycleMonitornetwork";
+	  desc=;
+	  flags=CAN_REVERT_TO_CODE;
+	  code_string="LeabraCycleMonitor(network)";
+	  prog_args {
+	   name="prog_args";
+	   el_typ=ProgArg;
+	   el_def=0;
+	   ProgArg @[0] {
+	    arg_type=Network;
+	    type="LeabraNetwork*";
+	    name="network";
+	    required=1;
+	    def_val=;
+	    prev_expr=;
+	    expr {
+	     expr="network";
+	    };
+	   };
+	  };
+	  target=.programs.gp[0][10]$$;
+	  targ_ld_init="*LeabraCycleMonitor*";
+	 };
 	};
        };
       };
@@ -8134,7 +8194,17 @@ this program can be extended to do arbitrary things to generate data and apply i
       meth_sig="void Quarter_Final()";
       meth_desc=" do final processing after each quarter: ";
      };
-     MethodCall @[8] {
+     AssignExpr @[8] {
+      name="AssignExpr_quarterquarter1";
+      desc="perform final operations at end of settling (storing final activations, etc)";
+      flags=CAN_REVERT_TO_CODE;
+      code_string="quarter = quarter + 1";
+      result_var=.programs.gp[0][4].vars[2]$$;
+      expr {
+       expr="quarter + 1";
+      };
+     };
+     MethodCall @[9] {
       name="MethodCall_networkComputePhaseStats";
       desc="compute appropriate stats for each phase (MinusStats, PlusStats)";
       flags=CAN_REVERT_TO_CODE;
@@ -8150,7 +8220,7 @@ this program can be extended to do arbitrary things to generate data and apply i
       meth_sig="void Compute_PhaseStats()";
       meth_desc=" compute MinusStats at the end of the minus phase, and PlusStats at the end of the plus phase -- this is preferred over the previous implementation of calling TrialStats only at the end of the minus phase, which required targets to be present in the minus phase, which is not always the case";
      };
-     NetUpdateView @[9] {
+     NetUpdateView @[10] {
       name="NetUpdateView_NetUpdateView";
       desc="update network views, if update_net_view == true";
       flags=CAN_REVERT_TO_CODE;
@@ -10930,7 +11000,7 @@ this program can be extended to do arbitrary things to generate data and apply i
      ProgVar @[2] {
       name="net";
       var_type=T_Real;
-      real_val=1;
+      real_val=0.949999988079071;
       object_scope=NULL;
       flags=CTRL_PANEL|NULL_CHECK|SAVE_VAL|USED|EDIT_VAL;
       reference=0;
@@ -13889,9 +13959,9 @@ this program can be extended to do arbitrary things to generate data and apply i
     el_typ=UserDataItem;
     el_def=0;
     UserDataItem @[0] {name="view_win_lft": value=0: val_type_fixed=0: };
-    UserDataItem @[1] {name="view_win_top": value=0.04009164: val_type_fixed=0: };
+    UserDataItem @[1] {name="view_win_top": value=0.03952011: val_type_fixed=0: };
     UserDataItem @[2] {name="view_win_wd": value=1: val_type_fixed=0: };
-    UserDataItem @[3] {name="view_win_ht": value=0.7949599: val_type_fixed=0: };
+    UserDataItem @[3] {name="view_win_ht": value=0.7946365: val_type_fixed=0: };
     UserDataItem @[4] {name="view_win_iconified": value=0: val_type_fixed=0: };
     UserDataItem @[5] {name="view_splitter_state": value=AAAA/wAAAAEAAAADAAABgAAAAogAAAGIAQAAAAYBAAAAAQE=: val_type_fixed=0: };
    };
@@ -13998,7 +14068,7 @@ taTransform @*(.m_transform) {scale={x=1: y=1: z=1: }: rotate={x=1: y=0: z=0: ro
 	  net_text_rot=-90;
 	  cur_unit_vals{ act;	  };
 	  hot_vars{ targ;ext;act;net;bias_wt;bias_dwt;act_eq;act_nd;act_m;act_p;act_dif;avg_m;avg_l;act_avg;r.wt;r.wt*act;s.wt;r.dwt;s.dwt;act_q1;act_q2;act_q3;act_q4;avg_ss;avg_s;avg_s_eff;avg_l_lrn;v_m_eq;v_m;gc_i;	  };
-	  unit_src_path=".layers[1].units[0]";
+	  unit_src_path=".layers[0].units[0]";
 	  con_type=ANY_CON;
 	  hist_idx=0;
 	  hist_save=1;
@@ -16073,6 +16143,20 @@ taTransform @*(.m_transform) {scale={x=1: y=1: z=1: }: rotate={x=0: y=0: z=1: ro
 	    mat_image=0;
 	    mat_odd_vert=1;
 	   };
+	   GridColView @[4] {
+	    name="wts";
+	    m_data=.data.gp[1][0].data[4]$$;
+	    cur_font_size=12;
+	    m_transform=NULL;
+	    visible=1;
+	    text_width=8;
+	    scale_on=1;
+	    scale_min=0;
+	    scale_max=0;
+	    mat_layout=BOT_ZERO;
+	    mat_image=0;
+	    mat_odd_vert=1;
+	   };
 	  };
 	  main_xform {scale={x=1: y=1: z=1: }: rotate={x=0: y=0: z=1: rot=0: }: translate={x=1: y=0: z=0: }: };
 	  annotations {
@@ -17411,9 +17495,9 @@ taTransform @*(.m_transform) {scale={x=1: y=1: z=1: }: rotate={x=0: y=0: z=1: ro
       el_typ=UserDataItem;
       el_def=0;
       UserDataItem @[0] {name="view_win_lft": value=0: val_type_fixed=0: };
-      UserDataItem @[1] {name="view_win_top": value=0.03092784: val_type_fixed=0: };
-      UserDataItem @[2] {name="view_win_wd": value=0.05694444: val_type_fixed=0: };
-      UserDataItem @[3] {name="view_win_ht": value=0.6895761: val_type_fixed=0: };
+      UserDataItem @[1] {name="view_win_top": value=0.01905434: val_type_fixed=0: };
+      UserDataItem @[2] {name="view_win_wd": value=0.03203125: val_type_fixed=0: };
+      UserDataItem @[3] {name="view_win_ht": value=0.7297106: val_type_fixed=0: };
       UserDataItem @[4] {name="view_win_iconified": value=0: val_type_fixed=0: };
       UserDataItem @[5] {name="view_visible": value=0: val_type_fixed=0: };
      };
@@ -17432,7 +17516,7 @@ taTransform @*(.m_transform) {scale={x=1: y=1: z=1: }: rotate={x=0: y=0: z=1: ro
  save_as_only=0;
  auto_name=1;
  last_change_desc="Project updated on wiki: CCN changes: updt to current";
- tree_state{ .;.docs;.ctrl_panels;.ctrl_panels[0].mbrs;.data;.data.gp[0];.data.gp[0][0];.data.gp[0][2];.data.gp[1];.data.gp[1][0];.data.gp[1][3];.data.gp[2];.programs;.programs.break_points;.programs[1].args;.programs[1].functions;.programs[2];.programs[2].objs;.programs[2].objs_vars;.programs[2].types;.programs[2].args;.programs[2].vars;.programs[2].functions;.programs[2].init_code;.programs[2].prog_code;.programs[2].prog_code[0];.programs[2].prog_code[1];.programs[2].prog_code[3];.programs[2].prog_code[4];.programs[3];.programs[3].objs;.programs[3].objs_vars;.programs[3].types;.programs[3].args;.programs[3].vars;.programs[3].functions;.programs[3].init_code;.programs[3].prog_code;.programs[3].prog_code[0];.programs.gp[0];.programs.gp[0][7];.programs.gp[0][7].objs;.programs.gp[0][7].objs[0];.programs.gp[0][7].objs_vars;.programs.gp[0][7].init_code;.programs.gp[0][7].prog_code;.programs.gp[0][7].prog_code[3];.programs.gp[0][7].prog_code[3].loop_code[0];.programs.gp[1];.programs.gp[1][2];.programs.gp[1][2].vars;.programs.gp[1][2].init_code;.programs.gp[1][2].prog_code;.programs.gp[1][2].prog_code[0];.programs.gp[1][2].prog_code[6];.programs.gp[1][3];.programs.gp[1][3].prog_code;.programs.gp[1][6];.programs.gp[1][6].objs;.programs.gp[1][6].objs[0];.networks;.networks[0];.networks[0].specs;.networks[0].specs[2];.networks[0].layers;.networks[0].layers[0];.networks[0].weights; };
+ tree_state{ .;.docs;.ctrl_panels;.data;.data.gp[0];.data.gp[0][0];.data.gp[0][2];.data.gp[1];.data.gp[1][0];.data.gp[1][3];.data.gp[2];.programs;.programs.break_points;.programs[1].args;.programs[1].functions;.programs[2].objs;.programs[2].objs_vars;.programs[2].types;.programs[2].args;.programs[2].vars;.programs[2].functions;.programs[2].init_code;.programs[2].prog_code;.programs[2].prog_code[0];.programs[2].prog_code[1];.programs[2].prog_code[3];.programs[2].prog_code[4];.programs[3].objs;.programs[3].objs_vars;.programs[3].types;.programs[3].args;.programs[3].vars;.programs[3].functions;.programs[3].init_code;.programs[3].prog_code;.programs[3].prog_code[0];.programs.gp[0];.programs.gp[0][2];.programs.gp[0][2].args;.programs.gp[0][2].vars;.programs.gp[0][2].init_code;.programs.gp[0][2].prog_code;.programs.gp[0][2].prog_code[4];.programs.gp[0][2].prog_code[7];.programs.gp[0][2].prog_code[7].loop_code[0];.programs.gp[0][2].prog_code[7].loop_code[1];.programs.gp[0][2].prog_code[8];.programs.gp[0][2].prog_code[11];.programs.gp[0][3];.programs.gp[0][3].args;.programs.gp[0][3].args[1];.programs.gp[0][3].vars;.programs.gp[0][3].prog_code;.programs.gp[0][3].prog_code[5];.programs.gp[0][3].prog_code[6];.programs.gp[0][3].prog_code[6].loop_code[0];.programs.gp[0][4];.programs.gp[0][4].vars;.programs.gp[0][4].init_code;.programs.gp[0][4].prog_code;.programs.gp[0][4].prog_code[0];.programs.gp[0][4].prog_code[6];.programs.gp[0][4].prog_code[6].loop_code[0];.programs.gp[0][4].prog_code[6].loop_code[2];.programs.gp[0][4].prog_code[6].loop_code[2].true_code[0];.programs.gp[0][4].prog_code[7];.programs.gp[0][5];.programs.gp[0][5].args;.programs.gp[0][5].vars;.programs.gp[0][5].prog_code;.programs.gp[0][7].objs;.programs.gp[0][7].objs[0];.programs.gp[0][7].prog_code;.programs.gp[0][7].prog_code[3];.programs.gp[0][7].prog_code[3].loop_code[0];.programs.gp[1][2];.programs.gp[1][2].vars;.programs.gp[1][2].init_code;.programs.gp[1][2].prog_code;.programs.gp[1][2].prog_code[0];.programs.gp[1][2].prog_code[6];.programs.gp[1][3];.programs.gp[1][3].prog_code;.programs.gp[1][6];.programs.gp[1][6].objs;.programs.gp[1][6].objs[0];.networks;.networks[0];.networks[0].specs;.networks[0].specs[0];.networks[0].specs[2];.networks[0].layers;.networks[0].layers[0];.networks[0].layers[0].units;.networks[0].weights; };
  networks {
   name="networks";
   el_typ=LeabraNetwork;
@@ -17594,7 +17678,7 @@ taTransform @*(.m_transform) {scale={x=1: y=1: z=1: }: rotate={x=0: y=0: z=1: ro
       interpolate=0;
      };
      use_unlearnable=1;
-     xcal {m_lrn=0: set_l_lrn=1: l_lrn=1: d_rev=0.1: d_thr=0.0001: d_rev_ratio=-9: };
+     xcal {m_lrn=1: set_l_lrn=0: l_lrn=0: d_rev=0.1: d_thr=0.0001: d_rev_ratio=-9: };
      wt_sig {gain=6: off=1: soft_bound=1: };
      dynlr {dwt_norm=NO_NORM: norm_tau=1000: norm_min=0.001: moment=NO_MOMENT: m_tau=10: s_tau=50: l_tau=2: xx1=1: gain=2: lrate_comp=0.01: norm_dt=0.001: norm_dt_c=0.999: m_dt=0.1: m_dt_c=0.9: s_dt=0.02: l_dt=0.5: };
      wt_bal {on=0: hi_thr=0.4: hi_gain=4: lo_thr=0.2: lo_gain=4: };

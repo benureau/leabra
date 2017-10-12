@@ -115,8 +115,8 @@ class ConnectionSpec:
         # xcal learning
         self.m_lrn    = 1.0     # weighting of the error driven learning
 
-        self.d_thr    = 0.0001
-        self.d_rev    = 0.1
+        self.d_thr    = 0.0001  # threshold value for XCAL check-mark function
+        self.d_rev    = 0.1     # reversal value for XCAL check-mark function
 
         self.sig_off  = 1.0
         self.sig_gain = 6.0
@@ -197,12 +197,14 @@ class ConnectionSpec:
         for link in connection.links:
             link.wt = max(0.0, min(1.0, link.wt)) # clipping weights after change
 
-    def apply_dwt(self,connection):
+    def apply_dwt(self, connection):
 
         for link in connection.links:
             link.dwt *= (1 - link.fwt) if (link.dwt > 0) else link.fwt
+            # print('before wt={} fwt={}, '.format(link.wt, link.fwt))
             link.fwt += link.dwt
             link.wt = self.sig(link.fwt)
+            # print('after wt={} fwt={}'.format(link.wt, link.fwt))
 
             link.dwt = 0.0
 
@@ -212,6 +214,8 @@ class ConnectionSpec:
         for link in connection.links:
             srs = link.post.avg_s_eff * link.pre.avg_s_eff
             srm = link.post.avg_m * link.pre.avg_m
+            #print('erro', self.m_lrn  * self.xcal(srs, srm))
+            #print('hebb', link.post.avg_l_lrn * self.xcal(srs, link.post.avg_l), '  link.post.avg_l_lrn=', link.post.avg_l_lrn)
             link.dwt += (  self.lrate * ( self.m_lrn * self.xcal(srs, srm)
                          + link.post.avg_l_lrn * self.xcal(srs, link.post.avg_l)))
 
