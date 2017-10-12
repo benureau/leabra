@@ -1,5 +1,6 @@
+import numpy as np
+
 from .unit import Unit, INPUT, HIDDEN, OUTPUT
-import statistics
 
 
 class Layer:
@@ -118,18 +119,18 @@ class LayerSpec:
         if self.lay_inhib:
             # Calculate feed forward inhibition
             netin = [u.g_e for u in layer.units]
-            if layer.genre == OUTPUT and self.cycle_count < 300:
-                print(self.cycle_count, netin)
-            layer.ffi = self.ff * max(0, statistics.mean(netin) - self.ff0)
+            # if layer.genre == OUTPUT and self.cycle_count < 300:
+            #     print(self.cycle_count, netin)
+            layer.ffi = self.ff * max(0, np.mean(netin) - self.ff0)
 
             # Calculate feed back inhibition
-            if layer.genre == OUTPUT and self.cycle_count < 300:
-                print(self.cycle_count, 'layer.avg_act ', layer.avg_act)
+            # if layer.genre == OUTPUT and self.cycle_count < 300:
+            #     print(self.cycle_count, 'layer.avg_act ', layer.avg_act)
             layer.fbi += self.fb_dt * (self.fb * layer.avg_act - layer.fbi)
 
-            if layer.genre == OUTPUT and self.cycle_count < 300:
-                print('gc_i ',  self.g_i * (layer.ffi + layer.fbi))
-                print('gc_i ',  self.g_i * (layer.ffi + layer.fbi), layer.ffi, layer.fbi)
+            # if layer.genre == OUTPUT and self.cycle_count < 300:
+            #     print('gc_i ',  self.g_i * (layer.ffi + layer.fbi))
+            #     print('gc_i ',  self.g_i * (layer.ffi + layer.fbi), layer.ffi, layer.fbi)
             return self.g_i * (layer.ffi + layer.fbi)
         else:
             return 0.0
@@ -149,7 +150,7 @@ class LayerSpec:
         for u in layer.units:
             u.cycle(phase, g_i=layer.gc_i)
 
-        layer.avg_act = statistics.mean(layer.activities)
+        layer.avg_act = np.mean(layer.activities)
 
         layer.update_logs()
         self.cycle_count += 1
