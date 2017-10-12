@@ -1,4 +1,5 @@
 import numpy as np
+import color
 
 
 def quantitative_match(python_logs, emergent_logs, limit=-1, check=True, rtol=1e-05, atol=0,
@@ -18,7 +19,15 @@ def quantitative_match(python_logs, emergent_logs, limit=-1, check=True, rtol=1e
         for t, (py, em) in enumerate(list(zip(python_logs[name], emergent_logs[name]))[:limit]):
             local_check = np.allclose(py, em, rtol=rtol, atol=atol)
             if verbose >= 2 or (verbose >= 1 and not local_check):
-                print('{}:{:2d} [{}] [py] {} != {} [em] diff={}'.format(
-                       name, t, ' ok ' if local_check else 'fail',     py,  em,        py-em))
+                if py == em:
+                    sign_text = '==', color.dye_out('same', 'green')
+                elif local_check:
+                    sign_text = '~=', color.dye_out(' ok ', 'green')
+                else:
+                    sign_text = '!=', color.dye_out('fail', 'bred')
+
+                diff_text = '' if py == em else 'diff={:+.2e}'.format(py - em)
+                print('{}:{:2d} [{}] [py] {:12.10f} {} {:12.10f} [em] {}'.format(
+                       name, t, sign_text[1], py, sign_text[0], em, diff_text))
             check = check and local_check
     return check
