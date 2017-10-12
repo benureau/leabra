@@ -10,15 +10,22 @@ import numpy as np
 import scipy.interpolate
 
 
+# type of layer and correspondingly, unit behaviors
+INPUT  = 0
+HIDDEN = 1
+OUTPUT = 2
+
 
 class Unit:
     """Leabra Unit (as implemented in emergent 8.0)"""
 
-    def __init__(self, spec=None, log_names=('net', 'I_net', 'v_m', 'act', 'v_m_eq', 'adapt')):
+    def __init__(self, spec=None, genre=HIDDEN, log_names=('net', 'I_net', 'v_m', 'act', 'v_m_eq', 'adapt')):
         """
         spec:  UnitSpec instance with custom values for the unit parameters.
                If None, default values will be used.
         """
+        self.genre = genre  # type of Unit
+
         self.spec = spec
         if self.spec is None:
             self.spec = UnitSpec()
@@ -182,6 +189,8 @@ class UnitSpec:
         self._nxx1_conv = None # precomputed convolution for the noisy xx1 function
 
     def avg_l_lrn(self, unit):
+        if unit.genre != HIDDEN:  # no self-organization for non-hidden layers
+            return 0.0
         avg_fact = (self.avg_lrn_max - self.avg_lrn_min)/(self.avg_l_gain - self.avg_l_min)
         return self.avg_lrn_min + avg_fact * (unit.avg_l - self.avg_l_min)
 

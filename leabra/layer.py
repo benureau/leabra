@@ -1,11 +1,11 @@
-from .unit import Unit
+from .unit import Unit, INPUT, HIDDEN, OUTPUT
 import statistics
 
 
 class Layer:
     """Leabra Layer class"""
 
-    def __init__(self, size, spec=None, unit_spec=None, name=None):
+    def __init__(self, size, spec=None, unit_spec=None, genre=HIDDEN, name=None):
         """
         size     :  Number of units in the layer.
         spec     :  LayerSpec instance with custom values for the parameter of
@@ -13,13 +13,15 @@ class Layer:
         unit_spec:  UnitSpec instance with custom values for the parameters of
                     the units of the layer. If None, default values will be used.
         """
+        self.genre = genre  # type of layer
+
         self.name = name
         self.spec = spec
         if self.spec is None:
             self.spec = LayerSpec()
         #!#assert self.spec.inhib.lower() in self.spec.legal_inhib
 
-        self.units = [Unit(spec=unit_spec) for _ in range(size)]
+        self.units = [Unit(spec=unit_spec, genre=genre) for _ in range(size)]
 
         self.gc_i = 0.0  # inhibitory conductance
         self.ffi  = 0.0  # feedforward component of inhibition
@@ -69,8 +71,6 @@ class Layer:
         print('State:')
         for name in ['gc_i', 'fbi', 'ffi']:
             print('   {}: {:.2f}'.format(name, getattr(self, name)))
-
-
 
 
 class LayerSpec:
