@@ -19,6 +19,7 @@ class Network:
             self.spec = NetworkSpec()
 
         self.cycle_count = 0 # number of cycles finished in the current trial
+        self.cycle_tot   = 0 # total number of cycles executed (not reset at end of trial)
         self.quarter_nb  = 1 # current quarter number (1, 2, 3 or 4)
         self.trial_count = 0 # number of trial finished
         self.phase       = 'minus'
@@ -126,6 +127,7 @@ class Network:
         for layer in self.layers:
             layer.cycle(self.phase)
         self.cycle_count += 1
+        self.cycle_tot   += 1
 
         self._post_cycle()
 

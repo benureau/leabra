@@ -249,7 +249,7 @@ class UnitSpec:
         if v_m < xs[0]:
             return 0.0
         elif xs[-1] < v_m:
-            return self.xx1(xs[-1])
+            return self.xx1(v_m)
         else:
             return float(scipy.interpolate.interp1d(xs, conv, kind='linear',
                                                     fill_value='extrapolate')(v_m))
@@ -329,6 +329,7 @@ class UnitSpec:
         # computing new_act, from v_m_eq (because rate-coded neuron)
         if unit.v_m_eq <= self.act_thr:
             new_act = act_fun(unit.v_m_eq - self.act_thr)
+            print('SUBTHR {} {}\n       new_act={}'.format(unit.v_m_eq, self.act_thr, new_act))
         else:
             gc_e = self.g_bar_e * unit.g_e
             gc_i = self.g_bar_i * g_i
@@ -338,9 +339,13 @@ class UnitSpec:
                        - unit.adapt) / (self.act_thr - self.e_rev_e)
 
             new_act = act_fun(gc_e - g_e_thr)  # gc_e == unit.net
+            print('ABVTHR {} net={} {}\n       new_act={}'.format(unit.v_m_eq, gc_e, g_e_thr, new_act))
+
 
         # updating activity
         unit.act_nd += dt_integ * self.dt_v_m * (new_act - unit.act_nd)
+        print('FASTCYV act={}'.format(unit.act_nd))
+
         #unit.act_nd = max(self.act_min, min(unit.act_nd, self.act_max))
         unit.act = unit.act_nd # FIXME: implement stp
 
