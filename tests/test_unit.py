@@ -37,19 +37,19 @@ class UnitTestsAPI(unittest.TestCase):
         u = leabra.Unit()
         u.force_activity(0.5)
         u.calculate_net_in()
-        u.cycle()
+        u.cycle('minus')
         self.assertEqual(u.act, 0.5)
 
         # is it maintained?
         for _ in range(10):
             u.calculate_net_in()
-            u.cycle()
+            u.cycle('minus')
             self.assertEqual(u.act, 0.5)
 
         u.act_ext = None # unforcing activity
         u.add_excitatory(0.5)
         u.calculate_net_in()
-        u.cycle()
+        u.cycle('minus')
         self.assertFalse(u.act == 0.5)
 
 
@@ -61,7 +61,7 @@ class UnitTestsAPI(unittest.TestCase):
         for _ in range(20):
             u.add_excitatory(1.0)
             u.calculate_net_in()
-            u.cycle()
+            u.cycle('minus')
 
         self.assertEqual(u.avg_l, 0.40)
         u.spec.update_avg_l(u)
@@ -93,18 +93,18 @@ class UnitTestsBehavior(unittest.TestCase):
         for _ in range(15):
             u.add_excitatory(1.0)
             u.calculate_net_in()
-            u.cycle()
+            u.cycle('minus')
 
         for _ in range(150):
             u.add_excitatory(1.0)
             u.calculate_net_in()
-            u.cycle()
+            u.cycle('minus')
             self.assertTrue(0.85 < u.act <= 0.95)
 
         for _ in range(10):
             u.add_excitatory(0.0)
             u.calculate_net_in()
-            u.cycle()
+            u.cycle('minus')
 
         self.assertTrue(u.act < 0.05)
 
@@ -127,7 +127,7 @@ class UnitTestsBehavior(unittest.TestCase):
         for t in range(10):
             u.force_activity(1.0)
             u.calculate_net_in()
-            u.cycle()
+            u.cycle('minus')
 
         for name in ['avg_ss', 'avg_s', 'avg_m', 'avg_s_eff']:
             self.assertTrue(getattr(u, name) != 0.15)
@@ -140,7 +140,7 @@ class UnitTestsBehavior(unittest.TestCase):
         spec = leabra.UnitSpec(adapt_on=False, noisy_act=True,
                                act_gain=40, act_sd=0.01)
         receiver = leabra.Unit(spec=spec)
-        receiver.cycle() # create the noisy_xx1 convolution
+        receiver.cycle('minus') # create the noisy_xx1 convolution
 
         xs, ys = spec._nxx1_conv
 
@@ -173,7 +173,7 @@ class UnitTestsBehavior(unittest.TestCase):
             for g_e in inputs:
                 receiver.add_excitatory(g_e)
                 receiver.calculate_net_in()
-                receiver.cycle()
+                receiver.cycle('minus')
 
             # note that here there seems to be a bit of drift on I_net after the 190 time mark.
             # possibly because of the single/double float precision discrepancy.

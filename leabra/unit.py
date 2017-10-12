@@ -69,9 +69,9 @@ class Unit:
     def avg_l_lrn(self):
         return self.spec.avg_l_lrn(self)
 
-    def cycle(self, g_i=0.0, dt_integ=1):
+    def cycle(self, phase, g_i=0.0, dt_integ=1):
         """Cycle the unit"""
-        return self.spec.cycle(self, g_i=g_i, dt_integ=dt_integ)
+        return self.spec.cycle(self, phase, g_i=g_i, dt_integ=dt_integ)
 
     def calculate_net_in(self):
         return self.spec.calculate_net_in(self)
@@ -294,7 +294,7 @@ class UnitSpec:
         unit.v_m_eq = unit.v_m
 
 
-    def cycle(self, unit, g_i=0.0, dt_integ=1):
+    def cycle(self, unit, phase, g_i=0.0, dt_integ=1):
         """Update activity
 
         unit    :  the unit to cycle
@@ -351,7 +351,8 @@ class UnitSpec:
                             + unit.spike * self.spike_gain
                           )
 
-        self.update_avgs(unit, dt_integ)
+        if phase == 'minus':
+            self.update_avgs(unit, dt_integ)
         unit.update_logs()
 
 

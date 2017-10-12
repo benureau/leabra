@@ -21,6 +21,7 @@ class Network:
         self.cycle_count = 0 # number of cycles finished in the current trial
         self.quarter_nb  = 1 # current quarter number (1, 2, 3 or 4)
         self.trial_count = 0 # number of trial finished
+        self.phase       = 'minus'
 
         self.layers      = list(layers)
         self.connections = list(connections)
@@ -95,7 +96,7 @@ class Network:
                 # reset all layers
                 if self.quarter_nb == 1:
                     for layer in self.layers:
-                        layer.reset()
+                        layer.trial_init()
                 # force activities for inputs
                 for name, activities in self._inputs.items():
                     self._get_layer(name).force_activity(activities)
@@ -123,7 +124,7 @@ class Network:
         for conn in self.connections:
             conn.cycle()
         for layer in self.layers:
-            layer.cycle()
+            layer.cycle(self.phase)
         self.cycle_count += 1
 
         self._post_cycle()
@@ -160,6 +161,7 @@ class Network:
         for layer in self.layers:
             for unit in layer.units:
                 unit.act_m = unit.act
+        self.phase = 'plus'
 
     def end_plus_phase(self):
         """End of the plus phase. Connections change weights."""
@@ -168,3 +170,5 @@ class Network:
         for layer in self.layers:
             for unit in layer.units:
                 unit.update_avg_l()
+
+        self.phase = 'minus'

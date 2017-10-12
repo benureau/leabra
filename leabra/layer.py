@@ -33,10 +33,11 @@ class Layer:
         self.from_connections = [] # connections from this layer
         self.to_connections   = [] # connections to this layer
 
-    def reset(self):
-        """Reset all the units in the layer"""
-        for u in self.units:
-            u.reset()
+        self.logs = {'gc_i': []}
+
+    def trial_init(self):
+        """Initialize the layer for a new trial. Reset all units, decays fbi and ffi."""
+        self.spec.trial_init(self)
 
     @property
     def activities(self):
@@ -47,6 +48,10 @@ class Layer:
     def g_e(self):
         """Return the matrix of the units's net exitatory input"""
         return [u.g_e for u in self.units]
+
+    def update_logs(self):
+        """Record current state. Called after each cycle."""
+        self.logs['gc_i'].append(self.gc_i)
 
     def force_activity(self, activities):
         """Set the units's activities equal to the inputs."""
@@ -60,8 +65,8 @@ class Layer:
         for u, net_raw in zip(self.units, inputs):
             u.add_excitatory(net_raw)
 
-    def cycle(self):
-        self.spec.cycle(self)
+    def cycle(self, phase):
+        self.spec.cycle(self, phase)
 
     def show_config(self):
         """Display the value of constants and state variables."""
@@ -88,6 +93,9 @@ class LayerSpec:
         self.ff    = 1.0    # feedforward scaling of inhibition
         self.g_i   = 1.8    # inhibition multiplier
 
+        self.trial_decay = 1.0  # decay factor for fbi and ffi. If 1.0, fbi and ffi will be reset to
+                                # 0 at the start of every trial
+
         # thresholds:
         self.ff0 = 0.1
 
@@ -103,32 +111,51 @@ class LayerSpec:
             assert hasattr(self, key) # making sure the parameter exists.
             setattr(self, key, value)
 
+        self.cycle_count = 0
+
     def _inhibition(self, layer):
         """Compute the layer inhibition"""
         if self.lay_inhib:
             # Calculate feed forward inhibition
             netin = [u.g_e for u in layer.units]
+            if layer.genre == OUTPUT and self.cycle_count < 300:
+                print(self.cycle_count, netin)
             layer.ffi = self.ff * max(0, statistics.mean(netin) - self.ff0)
 
             # Calculate feed back inhibition
+            if layer.genre == OUTPUT and self.cycle_count < 300:
+                print(self.cycle_count, 'layer.avg_act ', layer.avg_act)
             layer.fbi += self.fb_dt * (self.fb * layer.avg_act - layer.fbi)
 
+            if layer.genre == OUTPUT and self.cycle_count < 300:
+                print('gc_i ',  self.g_i * (layer.ffi + layer.fbi))
+                print('gc_i ',  self.g_i * (layer.ffi + layer.fbi), layer.ffi, layer.fbi)
             return self.g_i * (layer.ffi + layer.fbi)
         else:
             return 0.0
 
-    def _netin_scaling(self):
-        pass
-
-    def cycle(self, layer):
+    def cycle(self, layer, phase):
         """Cycle the layer, and all the units in it."""
+
         # calculate net inputs for this layer
         for u in layer.units:
             u.calculate_net_in()
 
         # update the state of the layer
-        layer.gc_i = self._inhibition(layer)
+        if phase == 'minus':
+            layer.gc_i = self._inhibition(layer)
+        # if layer.genre == OUTPUT:
+        #     print(self.cycle_count, layer.gc_i)
         for u in layer.units:
-            u.cycle(g_i=layer.gc_i)
+            u.cycle(phase, g_i=layer.gc_i)
 
         layer.avg_act = statistics.mean(layer.activities)
+
+        layer.update_logs()
+        self.cycle_count += 1
+
+    def trial_init(self, layer):
+        for u in layer.units:
+            u.reset()
+        layer.ffi -= self.trial_decay * layer.ffi
+        layer.fbi -= self.trial_decay * layer.fbi

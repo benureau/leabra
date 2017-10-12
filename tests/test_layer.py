@@ -21,11 +21,11 @@ class LayerTestAPI(unittest.TestCase):
 
         for _ in range(20):
             layer.add_excitatory([0.0, 0.5, 1.0])
-            layer.cycle()
+            layer.cycle('minus')
 
         for _ in range(100):
             layer.add_excitatory([0.0, 0.5, 1.0])
-            layer.cycle()
+            layer.cycle('minus')
             acts = layer.activities
             self.assertEqual(acts[0], 0.0)
             self.assertTrue(np.allclose(0.5, acts[1], rtol=1.0, atol=1e-01))
@@ -38,7 +38,7 @@ class LayerTestAPI(unittest.TestCase):
         layer.force_activity([0.0, 0.25, 0.50, 0.75, 1.0])
 
         for _ in range(100):
-            layer.cycle()
+            layer.cycle('minus')
             self.assertEqual(layer.activities, [0.0, 0.25, 0.50, 0.75, 1.0])
 
 
@@ -77,9 +77,9 @@ class LayerTestsBehavior(unittest.TestCase):
                 src_layer.force_activity(input_pattern)
             else:
                 src_layer.force_activity(10 * [0.0])
-            src_layer.cycle()
+            src_layer.cycle('minus')
             connection0.cycle()
-            dst_layer.cycle()
+            dst_layer.cycle('minus')
 
         self.assertTrue(quantitative_match(dst_layer.units[0].logs, emergent_data, rtol=2e-05, atol=0))
 

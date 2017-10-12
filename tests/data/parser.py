@@ -6,7 +6,7 @@ unit_fmt = {'cycle': int, 'net': float, 'I_net': float,
             'act': float, 'act_eq': float, 'act_nd': float,
             'v_m': float, 'vm_eq': float, 'spike': int, 'adapt': float,
             'syn_tr': float, 'syn_pr': float, 'syn_nr': float, 'syn_kre': float,
-            'avg_ss': float, 'avg_s': float, 'avg_m': float, 'avg_s_eff': float, 'avg_l': float}
+            'avg_ss': float, 'avg_s': float, 'avg_m': float, 'avg_s_eff': float, 'avg_l': float, 'gc_i': float}
 unit_trans = {'vm_eq': 'v_m_eq'}
 
 def parse_unit(filename, flat=False):

@@ -11,14 +11,15 @@ def build_network(n_input, n_output, n_hidden):
     conn_spec  = leabra.ConnectionSpec(proj='full', lrule='leabra', rnd_type='uniform',  rnd_mean=0.50, rnd_var=0.2)
 
     # input/outputs
-    input_layer  = leabra.Layer(n_input, spec=layer_spec, unit_spec=unit_spec, name='input_layer')
-    output_layer = leabra.Layer(n_output, spec=layer_spec, unit_spec=unit_spec, name='output_layer')
+    input_layer  = leabra.Layer(n_input, spec=layer_spec, unit_spec=unit_spec, genre=leabra.INPUT, name='input_layer')
+    output_layer = leabra.Layer(n_output, spec=layer_spec, unit_spec=unit_spec, genre=leabra.OUTPUT, name='output_layer')
 
     # creating the required numbers of hidden layers and connections
     layers = [input_layer]
     connections = []
     for i in range(n_hidden):
-        hidden_layer = leabra.Layer(n_input, spec=layer_spec, unit_spec=unit_spec, name='hidden_layer_{}'.format(i))
+        hidden_layer = leabra.Layer(n_input, spec=layer_spec, unit_spec=unit_spec,
+                                             genre=leabra.HIDDEN, name='hidden_layer_{}'.format(i))
         hidden_conn  = leabra.Connection(layers[-1],  hidden_layer, spec=conn_spec)
         layers.append(hidden_layer)
         connections.append(hidden_conn)
