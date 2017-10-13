@@ -74,13 +74,18 @@ class Connection:
     def weights(self, value):
         """Override the links weights"""
         if self.spec.proj.lower() == '1to1':
+            assert len(value) == len(self.links)
             for wt, link in zip(value, self.links):
-                link.wt = wt
+                link.wt  = wt
+                link.fwt = self.spec.sig_inv(wt)
         else:  # proj == 'full'
             link_it = iter(self.links)  # link iterator
+            assert len(value) * len(value[0]) == len(self.links)
             for i, pre_u in enumerate(self.pre.units):
                 for j, post_u in enumerate(self.post.units):
-                    next(link_it).wt = value[i][j]
+                    link = next(link_it)
+                    link.wt = value[i][j]
+                    link.fwt = self.spec.sig_inv(value[i][j])
 
     def learn(self):
         self.spec.learn(self)
@@ -138,6 +143,7 @@ class ConnectionSpec:
 
     def _rnd_wt(self):
         """Return a random weight, according to the specified distribution"""
+        print('RND_WT')
         if self.rnd_type == 'uniform':
             return random.uniform(self.rnd_mean - self.rnd_var,
                                   self.rnd_mean + self.rnd_var)
@@ -200,10 +206,12 @@ class ConnectionSpec:
     def apply_dwt(self, connection):
 
         for link in connection.links:
+            print('before', link.dwt, link.fwt, link.wt)
             link.dwt *= (1 - link.fwt) if (link.dwt > 0) else link.fwt
             # print('before wt={} fwt={}, '.format(link.wt, link.fwt))
             link.fwt += link.dwt
             link.wt = self.sig(link.fwt)
+            print('after', link.dwt, link.fwt, link.wt)
             # print('after wt={} fwt={}'.format(link.wt, link.fwt))
 
             link.dwt = 0.0
@@ -214,8 +222,8 @@ class ConnectionSpec:
         for link in connection.links:
             srs = link.post.avg_s_eff * link.pre.avg_s_eff
             srm = link.post.avg_m * link.pre.avg_m
-            # print('erro', self.m_lrn  * self.xcal(srs, srm))
-            # print('hebb', link.post.avg_l_lrn * self.xcal(srs, link.post.avg_l), '  link.post.avg_l_lrn=', link.post.avg_l_lrn)
+            print('erro', self.m_lrn  * self.xcal(srs, srm))
+            print('hebb', link.post.avg_l_lrn * self.xcal(srs, link.post.avg_l), '  link.post.avg_l_lrn=', link.post.avg_l_lrn)
             link.dwt += (  self.lrate * ( self.m_lrn * self.xcal(srs, srm)
                          + link.post.avg_l_lrn * self.xcal(srs, link.post.avg_l)))
 
