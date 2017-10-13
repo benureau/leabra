@@ -74,7 +74,6 @@ def _post_processing(weights):
             for i, w in enumerate(wts):
                 weight_matrix[i].append(w)
         post_weights[key] = weight_matrix
-        print(weight_matrix)
 
     return post_weights
 

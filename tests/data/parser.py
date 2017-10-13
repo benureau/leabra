@@ -2,29 +2,27 @@ import os
 import numpy as np
 
 
-unit_fmt = {'cycle': int, 'net': float, 'I_net': float,
-            'act': float, 'act_eq': float, 'act_nd': float,
-            'v_m': float, 'vm_eq': float, 'spike': int, 'adapt': float,
-            'syn_tr': float, 'syn_pr': float, 'syn_nr': float, 'syn_kre': float,
-            'avg_ss': float, 'avg_s': float, 'avg_m': float, 'avg_s_eff': float, 'avg_l': float, 'gc_i': float}
+# unit_fmt = {'cycle': int, 'net': float, 'I_net': float,
+#             'act': float, 'act_eq': float, 'act_nd': float,
+#             'v_m': float, 'vm_eq': float, 'spike': int, 'adapt': float,
+#             'syn_tr': float, 'syn_pr': float, 'syn_nr': float, 'syn_kre': float,
+#             'avg_ss': float, 'avg_s': float, 'avg_m': float, 'avg_s_eff': float, 'avg_l': float, 'gc_i': float}
 unit_trans = {'vm_eq': 'v_m_eq'}
 
 def parse_unit(filename, flat=False):
-    return parse_file(filename, unit_fmt, trans=unit_trans, flat=flat)
+    return parse_file(filename, trans=unit_trans, flat=flat)
 
-weights_fmt = {'trial_name': str, 'sse': float, 'Input_act_m': float, 'Output_act_m': float, 'wts': float}
+# weights_fmt = {'trial_name': str, 'sse': float, 'Input_act_m': float, 'Output_act_m': float, 'wts': float}
 weights_trans = {'Input_act_m': 'input_act_m', 'Output_act_m': 'output_act_m', 'wts':'wt'}
 
 def parse_weights(filename, flat=False):
     """Parse weight matrix with only one element"""
-    return parse_file(filename, weights_fmt, trans=weights_trans, flat=flat)
-
+    return parse_file(filename, trans=weights_trans, flat=flat)
 
 def parse_xy(filename, flat=False):
-    return parse_file(filename, {'x': float, 'y': float}, flat=flat)
+    return parse_file(filename, flat=flat)
 
-
-def parse_file(filename, fmt, trans=None, flat=False):
+def parse_file(filename, trans=None, flat=False):
     """Return the data file as a dict
 
     `vm_eq` is renamed in `v_m_eq`.
@@ -44,14 +42,15 @@ def parse_file(filename, fmt, trans=None, flat=False):
     for line in lines[1:]:
         assert len(line) == 0 or line.startswith('_D:'), 'Unrecognized format {}'.format(filepath)
 
-    header, matrices_pos, matrices_dim = [], [], []
+    header, fmt, matrices_pos, matrices_dim = [], {}, [], []
     for name in lines[0].split('\t')[1:]:
-        if name[0] in ['%', '|', '$', '&']:
-            name = name[1:]
+        fmt_sign = name[0]
+        name = name[1:]
 
         if '[' in name:
-            core_name = name[:name.index('[')] # FIXME: decode and handle matrices
+            core_name = name[:name.index('[')]
             header.append(core_name)
+            fmt[core_name] = float
 
             matrix_pos = (name[name.index('[')+1:name.index(']')]).split(':')[1].split(',')
             matrix_pos = tuple(int(d) for d in matrix_pos)
@@ -68,10 +67,8 @@ def parse_file(filename, fmt, trans=None, flat=False):
             matrices_dim.append(None)
             matrices_pos.append(None)
             header.append(name)
-        #if not name in header:
-        #
+            fmt[name] = {'|': int, '$': str, '%': float, '&': float}[fmt_sign]
 
-    assert set(header).issubset(set(list(fmt.keys()))), '{} != {}'.format(set(header), set(list(fmt.keys())))
     data = {name: [] for name in header}
 
     for line in lines[1:]:
