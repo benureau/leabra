@@ -20,6 +20,7 @@ the implementation is correct yet.
 - [x] Quantitative equivalence with emergent
 - [x] Neuron tutorial notebook
 - [ ] Inhibition tutorial notebook
+- [ ] Weight balance mechanism
 
 
 ## Installation & Usage

@@ -356,8 +356,8 @@ class UnitSpec:
                             + unit.spike * self.spike_gain
                           )
 
-        if phase == 'minus':
-            self.update_avgs(unit, dt_integ)
+        # if phase == 'minus':
+        self.update_avgs(unit, dt_integ)
         unit.update_logs()
 
 
@@ -389,7 +389,7 @@ class UnitSpec:
         unit.avg_s  += dt_integ * self.avg_s_dt  * (unit.avg_ss - unit.avg_s )
         unit.avg_m  += dt_integ * self.avg_m_dt  * (unit.avg_s  - unit.avg_m )
         unit.avg_s_eff = self.avg_m_in_s * unit.avg_m + (1 - self.avg_m_in_s) * unit.avg_s
-
+        # print('avg_s_eff', unit.avg_s_eff)
 
     def update_avg_l(self, unit):
         """Update the long-term average.

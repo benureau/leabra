@@ -143,7 +143,6 @@ class ConnectionSpec:
 
     def _rnd_wt(self):
         """Return a random weight, according to the specified distribution"""
-        print('RND_WT')
         if self.rnd_type == 'uniform':
             return random.uniform(self.rnd_mean - self.rnd_var,
                                   self.rnd_mean + self.rnd_var)
@@ -206,24 +205,22 @@ class ConnectionSpec:
     def apply_dwt(self, connection):
 
         for link in connection.links:
-            print('before', link.dwt, link.fwt, link.wt)
+            # print('before  wt={}  fwt={}  dwt={}'.format(link.wt, link.fwt, link.dwt))
             link.dwt *= (1 - link.fwt) if (link.dwt > 0) else link.fwt
-            # print('before wt={} fwt={}, '.format(link.wt, link.fwt))
             link.fwt += link.dwt
             link.wt = self.sig(link.fwt)
-            print('after', link.dwt, link.fwt, link.wt)
-            # print('after wt={} fwt={}'.format(link.wt, link.fwt))
+            # print('after   wt={}  fwt={}  dwt={}'.format(link.wt, link.fwt, link.dwt))
 
             link.dwt = 0.0
 
     def learning_rule(self, connection):
         """Leabra learning rule."""
 
-        for link in connection.links:
+        for i, link in enumerate(connection.links):
             srs = link.post.avg_s_eff * link.pre.avg_s_eff
             srm = link.post.avg_m * link.pre.avg_m
-            print('erro', self.m_lrn  * self.xcal(srs, srm))
-            print('hebb', link.post.avg_l_lrn * self.xcal(srs, link.post.avg_l), '  link.post.avg_l_lrn=', link.post.avg_l_lrn)
+            # print('{}:{} erro {}\n  ru_avg_s_eff={}\n  su_avg_s_eff={}\n  srs={}\n  ru_avg_m={}\n  su_avg_m={}\n  srm={}'.format(connection.post.name, i, self.m_lrn  * self.xcal(srs, srm), link.post.avg_s_eff, link.pre.avg_s_eff, srs, link.post.avg_m, link.pre.avg_m, srm))
+            # print('{}:{} hebb {}\n  avg_l_lrn={}\n  xcal={}\n  srs={}\n  avg_l={}'.format(connection.post.name, i, link.post.avg_l_lrn * self.xcal(srs, link.post.avg_l), link.post.avg_l_lrn, self.xcal(srs, link.post.avg_l), srs, link.post.avg_l))
             link.dwt += (  self.lrate * ( self.m_lrn * self.xcal(srs, srm)
                          + link.post.avg_l_lrn * self.xcal(srs, link.post.avg_l)))
 
