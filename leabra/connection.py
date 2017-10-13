@@ -214,8 +214,8 @@ class ConnectionSpec:
         for link in connection.links:
             srs = link.post.avg_s_eff * link.pre.avg_s_eff
             srm = link.post.avg_m * link.pre.avg_m
-            #print('erro', self.m_lrn  * self.xcal(srs, srm))
-            #print('hebb', link.post.avg_l_lrn * self.xcal(srs, link.post.avg_l), '  link.post.avg_l_lrn=', link.post.avg_l_lrn)
+            # print('erro', self.m_lrn  * self.xcal(srs, srm))
+            # print('hebb', link.post.avg_l_lrn * self.xcal(srs, link.post.avg_l), '  link.post.avg_l_lrn=', link.post.avg_l_lrn)
             link.dwt += (  self.lrate * ( self.m_lrn * self.xcal(srs, srm)
                          + link.post.avg_l_lrn * self.xcal(srs, link.post.avg_l)))
 
