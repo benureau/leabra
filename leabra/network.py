@@ -2,8 +2,9 @@
 class NetworkSpec:
     """Network parameters"""
 
-    def __init__(self, **kwargs):
-        self.quarter_size = 25  # number of cycles in a settle period
+    def __init__(self, quarter_size = 25, **kwargs):
+        # number of cycles in a settle period
+        self.quarter_size = quarter_size
 
         for key, value in kwargs.items():
             assert hasattr(self, key) # making sure the parameter exists.
